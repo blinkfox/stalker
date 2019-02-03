@@ -1,7 +1,11 @@
 package com.blinkfox.stalker.test.config;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.output.MeasureOutput;
 import com.blinkfox.stalker.output.OutputConsole;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +21,7 @@ public class OptionsTest {
     private static final String NAME = "test";
 
     /**
-     * 测试构造实例的of方法.
+     * 测试各种构造实例的of方法.
      */
     @Test
     public void of() {
@@ -27,15 +31,26 @@ public class OptionsTest {
         Assert.assertEquals(5, Options.of(5).getRuns());
         Assert.assertEquals(1, Options.of().outputs(new OutputConsole()).getOutputs().size());
 
-        Options options1 = Options.of(NAME, 5);
+        List<MeasureOutput> outputList = new ArrayList<>();
+        outputList.add(new OutputConsole());
+        Options options1 = Options.of(NAME, 5)
+                .printErrorLog(true)
+                .outputs(outputList);
         Assert.assertEquals(NAME, options1.getName());
         Assert.assertEquals(5, options1.getRuns());
+        Assert.assertTrue(options1.isPrintErrorLog());
+        Assert.assertEquals(1, options1.getOutputs().size());
 
-        Options options2 = Options.of(NAME, 10, 3, 1);
+        Options options2 = Options.of(NAME, 5, 2);
         Assert.assertEquals(NAME, options2.getName());
-        Assert.assertEquals(10, options2.getThreads());
-        Assert.assertEquals(3, options2.getConcurrens());
-        Assert.assertEquals(1, options2.getRuns());
+        Assert.assertEquals(5, options2.getThreads());
+        Assert.assertEquals(2, options2.getConcurrens());
+
+        Options options3 = Options.of(NAME, 10, 3, 1);
+        Assert.assertEquals(NAME, options3.getName());
+        Assert.assertEquals(10, options3.getThreads());
+        Assert.assertEquals(3, options3.getConcurrens());
+        Assert.assertEquals(1, options3.getRuns());
     }
 
     /**
