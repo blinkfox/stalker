@@ -138,10 +138,10 @@ public class Options {
      */
     public void valid() {
         // 对各个选项参数进行检查、校验，失败时抛出异常.
-        if (this.verify(this.getThreads() < 0, "Options 中的线程数 threads 的值必须大于0.")
-                && this.verify(this.getConcurrens() < 0, "Options 中的线程数 concurrens 的值必须大于0.")
-                && this.verify(this.getWarmups() < 0, "Options 中的线程数 warmups 的值必须大于0.")
-                && this.verify(this.getRuns() < 0, "Options 中的线程数 runs 的值必须大于0.")) {
+        if (this.verify(this.getThreads() <= 0, "Options 中的线程数 threads 的值必须大于0.")
+                || this.verify(this.getConcurrens() <= 0, "Options 中的线程数 concurrens 的值必须大于0.")
+                || this.verify(this.getWarmups() < 0, "Options 中的线程数 warmups 的值必须大于0.")
+                || this.verify(this.getRuns() <= 0, "Options 中的线程数 runs 的值必须大于0.")) {
             throw new IllegalArgumentException(this.message);
         }
     }
