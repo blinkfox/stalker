@@ -30,7 +30,7 @@ public class Options {
     /** 是否打印出执行错误(异常运行)的日志，默认是false. */
     private boolean printErrorLog;
 
-    /** 输出 */
+    /** 将测量结果通过多种方式输出出来的集合. */
     private List<MeasureOutput> outputs;
 
     /** 校验失败时的提示消息. */

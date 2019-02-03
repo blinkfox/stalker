@@ -4,7 +4,7 @@ import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
 
 /**
- * Assert.
+ * 关于性能测量和评估的断言.
  *
  * @author blinkfox on 2019-01-23.
  */
@@ -23,7 +23,7 @@ public final class Assert {
     }
 
     /**
-     * 使用给定的消息进行测试失败。
+     * 使用给定的消息进行测试失败.
      *
      * @param message message
      * @see AssertionError

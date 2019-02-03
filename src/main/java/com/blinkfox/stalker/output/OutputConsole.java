@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.output;
 
+import com.blinkfox.minitable.MiniTable;
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.kit.MiniTable;
 import com.blinkfox.stalker.kit.StrKit;
 import com.blinkfox.stalker.result.bean.EasyReadResult;
 import com.blinkfox.stalker.result.bean.Measurement;
@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 在控制台输出结果的实现类.
- * <p>工资台输出的结果示例如下：</p>
- *
+ * <p>控制台输出的结果示例如下：</p>
  * +--------------------------------------------------------------------------------------------------------------------------------------+
  * |                               threads: 1000, concurrens: 100, warmups:5, runs: 5, printErrorLog: false                               |
  * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+

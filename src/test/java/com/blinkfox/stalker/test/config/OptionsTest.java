@@ -1,6 +1,8 @@
-package com.blinkfox.stalker.config;
+package com.blinkfox.stalker.test.config;
 
+import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.OutputConsole;
+
 import org.junit.Assert;
 import org.junit.Test;
 

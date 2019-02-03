@@ -1,6 +1,8 @@
-package com.blinkfox.stalker;
+package com.blinkfox.stalker.test;
 
+import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.test.prepare.MyTestService;
 
 import org.junit.Test;
 
@@ -16,7 +18,7 @@ public class StalkerTest {
      */
     @Test
     public void runWithoutOptions() {
-        Stalker.run(() -> new MyTestService().hello("world"));
+        Stalker.run(() -> new MyTestService().hello());
     }
 
     /**
@@ -24,6 +26,7 @@ public class StalkerTest {
      */
     @Test
     public void run() {
-        Stalker.run(Options.of(100, 20), () -> new MyTestService().hello("world"));
+        Stalker.run(Options.of(100, 20), () -> new MyTestService().hello());
     }
+
 }

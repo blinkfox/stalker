@@ -3,9 +3,6 @@ package com.blinkfox.stalker.result.statis;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.result.bean.StatisResult;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 默认的测量结果统计实现.
  *
@@ -73,15 +70,15 @@ public class DefaultMeasureStatis implements MeasureStatis {
      */
     private StatisResult buildOtherResult(StatisResult statisResult, long[] eachMeasures) {
         // 计算方差所需的平方和.
-        long s = 0;
+        double s = 0;
         long avg = statisResult.getAvg();
         for (long measure : eachMeasures) {
-            s += Math.pow(measure - avg, 2);
+            s += Math.pow(measure - (double) avg, 2);
         }
 
         // 分别计算出标准差和95%的置信区间半径.
         long n = eachMeasures.length;
-        double stdDev = Math.sqrt((double) s / n);
+        double stdDev = Math.sqrt(s / n);
         double radius = (Z * stdDev) / Math.sqrt(n);
 
         statisResult.setStdDev(stdDev);

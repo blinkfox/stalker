@@ -7,7 +7,7 @@ import java.util.ArrayList;
  *
  * @author blinkfox on 2019-01-30.
  */
-public class StalkerConfigManager {
+public final class StalkerConfigManager {
 
     /** 全局唯一的 StalkerConfigManager 实例. */
     private static final StalkerConfigManager stalkerConfigManager = new StalkerConfigManager();
@@ -52,7 +52,7 @@ public class StalkerConfigManager {
      *
      * @param options 选项参数
      */
-    public void reLoadOptions(Options options) {
+    public synchronized void reLoadOptions(Options options) {
         options.valid();
         this.defaultOptions = options;
     }
