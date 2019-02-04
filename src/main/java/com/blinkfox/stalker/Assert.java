@@ -19,20 +19,7 @@ public final class Assert {
      * 测试失败.
      */
     public static void fail() {
-        fail(null);
-    }
-
-    /**
-     * 使用给定的消息进行测试失败.
-     *
-     * @param message message
-     * @see AssertionError
-     */
-    public static void fail(String message) {
-        if (message == null) {
-            throw new AssertionError();
-        }
-        throw new AssertionError(message);
+        throw new AssertionError();
     }
 
     /**
