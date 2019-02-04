@@ -24,12 +24,7 @@ public class MyTestService {
         }
 
         // 模拟运行占用约 2~5 ms 的时间.
-        try {
-            Thread.sleep(2L + new Random().nextInt(3));
-        } catch (InterruptedException e) {
-            log.info("InterruptedException", e);
-            Thread.currentThread().interrupt();
-        }
+        this.sleep(2L + new Random().nextInt(3));
     }
 
     /**
@@ -37,12 +32,28 @@ public class MyTestService {
      */
     public void fastHello() {
         // 模拟运行占用约 2 ms 的时间.
+        this.sleep(2L);
+    }
+
+    /**
+     * 本线程调用该方法时，睡眠指定时间，用来模拟业务耗时.
+     *
+     * @param time 时间
+     */
+    private void sleep(long time) {
         try {
-            Thread.sleep(2L);
+            Thread.sleep(time);
         } catch (InterruptedException e) {
             log.info("InterruptedException", e);
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * 测试执行异常的方法.
+     */
+    public void helloException() {
+        throw new MyServiceException("My Service Exception.");
     }
 
 }

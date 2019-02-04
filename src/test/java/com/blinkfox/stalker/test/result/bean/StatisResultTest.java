@@ -16,7 +16,7 @@ public class StatisResultTest {
     public void testToString() {
         StatisResult statisResult = new StatisResult();
         statisResult.setMax(30);
-        Assert.assertNotNull(statisResult);
+        Assert.assertNotNull(statisResult.toString());
     }
 
 }

@@ -103,7 +103,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
                 runnable.run();
                 this.eachMeasures.add(System.nanoTime() - eachStart);
                 this.success.incrementAndGet();
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 // 如果待测量的方法，执行错误则失败数 +1,且根据选项参数来判断是否打印异常错误日志.
                 this.failure.incrementAndGet();
                 if (printErrorLog) {
