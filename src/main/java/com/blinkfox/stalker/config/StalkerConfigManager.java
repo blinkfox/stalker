@@ -1,6 +1,6 @@
 package com.blinkfox.stalker.config;
 
-import java.util.ArrayList;
+import com.blinkfox.stalker.output.OutputConsole;
 
 /**
  * Stalker 单例的全局配置管理类.
@@ -25,7 +25,7 @@ public final class StalkerConfigManager {
                 .warmups(5)
                 .runs(10)
                 .printErrorLog(false)
-                .outputs(new ArrayList<>());
+                .outputs(new OutputConsole());
     }
 
     /**

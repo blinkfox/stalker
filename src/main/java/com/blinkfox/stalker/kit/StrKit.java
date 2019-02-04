@@ -11,7 +11,7 @@ import java.math.RoundingMode;
 public final class StrKit {
 
     /** 空字符串. */
-    private static final String EMPTY = "";
+    public static final String EMPTY = "";
 
     /**
      * 私有构造方法.
@@ -43,7 +43,7 @@ public final class StrKit {
             return sb.toString();
         }
 
-        return "";
+        return EMPTY;
     }
 
     /**

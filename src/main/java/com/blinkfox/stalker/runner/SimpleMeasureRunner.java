@@ -2,6 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

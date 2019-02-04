@@ -2,6 +2,7 @@ package com.blinkfox.stalker.config;
 
 import com.blinkfox.stalker.output.MeasureOutput;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -232,6 +233,10 @@ public class Options {
      * @param measureOutputs 输出通道的集合.
      */
     public Options outputs(MeasureOutput... measureOutputs) {
+        if (this.outputs == null) {
+            this.outputs = new ArrayList<>();
+        }
+
         this.outputs.addAll(Arrays.asList(measureOutputs));
         return this;
     }

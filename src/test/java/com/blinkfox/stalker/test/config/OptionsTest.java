@@ -29,7 +29,7 @@ public class OptionsTest {
         Assert.assertEquals(NAME, Options.of().named(NAME).getName());
         Assert.assertEquals(NAME, Options.of(NAME).getName());
         Assert.assertEquals(5, Options.of(5).getRuns());
-        Assert.assertEquals(1, Options.of().outputs(new OutputConsole()).getOutputs().size());
+        Assert.assertEquals(2, Options.of().outputs(new OutputConsole()).getOutputs().size());
 
         List<MeasureOutput> outputList = new ArrayList<>();
         outputList.add(new OutputConsole());
