@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>stalker</name>
-    <description>A library for performance evaluation of Java code.</description>
+    <description>A small library for performance evaluation of Java code.</description>
     <url>https://github.com/blinkfox/stalker</url>
 
     <licenses>

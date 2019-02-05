@@ -30,6 +30,16 @@ public class StalkerTest {
     }
 
     /**
+     * 测试有options选项参数时的执行情况.
+     */
+    @Test
+    public void runMultiRunnables() {
+        Stalker.run(Options.of(100, 20),
+                () -> new MyTestService().hello(),
+                () -> new MyTestService().fastHello());
+    }
+
+    /**
      * 测试 Options 为 null 时的执行情况.
      */
     @Test(expected = IllegalArgumentException.class)
