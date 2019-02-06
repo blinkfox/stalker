@@ -219,11 +219,11 @@ public class Options {
     /**
      * 设置是否打印运行错误的日志的 printErrorLog 的属性值.
      *
-     * @param isPrint 是否打印异常运行的日志
+     * @param printErrorLog 是否打印异常运行的日志
      * @return Options实例
      */
-    public Options printErrorLog(boolean isPrint) {
-        this.printErrorLog = isPrint;
+    public Options printErrorLog(boolean printErrorLog) {
+        this.printErrorLog = printErrorLog;
         return this;
     }
 

@@ -2,17 +2,17 @@
 
 [![HitCount](http://hits.dwyl.io/blinkfox/stalker.svg)](http://hits.dwyl.io/blinkfox/stalker) [![Build Status](https://secure.travis-ci.org/blinkfox/stalker.svg)](https://travis-ci.org/blinkfox/stalker) [![GitHub license](https://img.shields.io/github/license/blinkfox/stalker.svg)](https://github.com/blinkfox/stalker/blob/master/LICENSE) [![codecov](https://codecov.io/gh/blinkfox/stalker/branch/master/graph/badge.svg)](https://codecov.io/gh/blinkfox/stalker) ![Java Version](https://img.shields.io/badge/Java-%3E%3D%208-blue.svg)
 
-[中文介绍](https://github.com/blinkfox/stalker/blob/master/README_CN.md)
+[English Document](https://github.com/blinkfox/stalker/blob/master/README.md)
 
-> A small library for performance evaluation of Java code.
+> 这是一个简单的用来对Java代码做性能评估的工具库。
 
-## Features
+## 特性
 
-- Lightweight (jar package is only '26kb')
-- API are simple and easy to use. 
-- Easy integration or expansion
+- 轻量级（jar包仅`26kb`）
+- API简单易用
+- 易于集成或扩展
 
-## Maven integration
+## Maven集成
 
 ```xml
 <dependency>
@@ -22,15 +22,15 @@
 </dependency>
 ```
 
-## API introduction and use
+## API 介绍和使用
 
-### Prepare
+### 预先准备
 
-Before doing performance testing on Java methods, prepare the test service class and methods to be tested:
+在对Java方法做性能测试之前，先准备好待测试的类和方法：
 
 ```java
 /**
- * A class used to measure (test only) the time-consuming execution of methods in this class.
+ * 用于测量（仅测试使用）该类中的方法的执行耗时的类.
  *
  * @author blinkfox on 2019-02-03.
  */
@@ -39,27 +39,27 @@ public class MyTestService {
     private static final Logger log = LoggerFactory.getLogger(MyTestService.class);
 
     /**
-     * Test Method 1, the simulation of the business code takes 2~5 ms, 
-     * and there will be a 1% chance of executing the exception.
+     * 测试方法1，模拟业务代码耗时 2~5 ms，且会有约 1% 的几率执行异常.
      */
     public void hello() {
+        // 模拟运行时抛出异常.
         if (new Random().nextInt(100) == 5) {
             throw new MyServiceException("My Service Exception.");
         }
 
+        // 模拟运行占用约 2~5 ms 的时间.
         this.sleep(2L + new Random().nextInt(3));
     }
 
     /**
-     * Test Method 2, the simulation business code runs for about 2 ms.
+     * 测试方法2，模拟业务代码运行占用约 2 ms 的时间.
      */
     public void fastHello() {
         this.sleep(2L);
     }
 
     /**
-     * When this thread calls this method, 
-     * it sleeps for the specified time and is used to simulate the time-consuming business.
+     * 本线程调用该方法时，睡眠指定时间，用来模拟业务耗时.
      *
      * @param time 时间
      */
@@ -75,11 +75,11 @@ public class MyTestService {
 }
 ```
 
-### Stalker
+### Stalker类
 
-#### 1. Simplest example
+#### 1. 最简示例
 
-The following code will warm up to `5` times, then formally execute `10` times in a single thread, and then calculate the statistics of the running results and output them:
+以下代码将会预热`5`次，然后在单线程下正式执行`10`次，从而将运行结果计算统计并输出出来：
 
 ```java
 public static void main(String[] args) {
@@ -87,7 +87,7 @@ public static void main(String[] args) {
 }
 ```
 
-The above results will default to the console output:
+以上结果将默认在控制台输出：
 
 ```bash
 +-----------------------------------------------------------------------------------------------------------------------------------------+
@@ -99,9 +99,9 @@ The above results will default to the console output:
 +---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
 ```
 
-#### 2. More complete example
+#### 2. 更全示例
 
-The following code indicates that the two methods `hello()` and `fastHello()` will preheat `1000` times, in the `1000` threads `200` concurrent, each time executing `10` times:
+以下代码表示，两个方法`hello()`和`fastHello()`将会预热`1000`次，在`1000`个线程`200`个并发下，每次执行`10`次：
 
 ```java
 Stalker.run(Options.of(1000, 200).warmups(1000).runs(10),
@@ -109,7 +109,7 @@ Stalker.run(Options.of(1000, 200).warmups(1000).runs(10),
         () -> new MyTestService().fastHello());
 ```
 
-The above results will default to the console output:
+以上结果将默认在控制台输出：
 
 ```bash
 +------------------------------------------------------------------------------------------------------------------------------------------+
@@ -122,28 +122,28 @@ The above results will default to the console output:
 +---+-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
 ```
 
-#### 3. Main methods
+#### 3. 主要方法
 
-- `void run(Runnable... runnables)`: Perform performance measurement evaluation on several code to be executed.
-- `void run(Options options, Runnable... runnables)`: Performance measurement evaluation of several code to be executed by custom `Options`.
+- `void run(Runnable... runnables)`: 对若干个要执行的代码做性能测量评估.
+- `void run(Options options, Runnable... runnables)`: 通过自定义的`Options`对若干个要执行的代码做性能测量评估.
 
-### Options
+### Options类
 
-Options indicates option parameters when making performance measurements.
+Options表示做性能测量时的选项参数
 
-#### The main properties are as follows
+#### 主要属性如下
 
-- `name`: name.
-- `threads`: The number of threads that are executed. The default is 1.
-- `concurrens`: The number of concurrent executions under formal multithreading. The default is 1.
-- `warmups`: The number of warm ups under single thread, the default is 5.
-- `runs`: The number of times each thread is executed, the default is 10.
-- `printErrorLog`: Whether to print the error log, the default is false.
-- `outputs`: The measurement results are output in a variety of ways (collections). The default is output to the console, which can be customized to implement the `MeasureOutput` interface.
+- `name`: 选项参数的名称
+- `threads`: 正式执行的线程数，默认为1。
+- `concurrens`: 正式多线程下执行的并发数，默认为1。
+- `warmups`: 单线程下的预热次数，默认5。
+- `runs`: 每个线程正式执行的次数，默认10。
+- `printErrorLog`: 是否打印错误日志，默认false。
+- `outputs`: 将测量结果通过多种方式(集合)输出出来，默认为输出到控制台，可自定义实现`MeasureOutput`接口。
 
-#### Main methods
+#### 主要方法
 
-Here are a few overloaded methods for constructing an `Options` instance:
+以下是构造`Options`实例的若干重载方法：
 
 - `Options of(String name)`
 - `Options of(int runs)`
@@ -152,22 +152,22 @@ Here are a few overloaded methods for constructing an `Options` instance:
 - `Options of(String name, int threads, int concurrens)`
 - `Options of(String name, int threads, int concurrens, int runs)`
 
-Other methods:
+其他方法：
 
-- `boolean valid()`: Check whether the parameters related to Options are legal.
-- `Options named(String name)`: Set the name property of the Options instance
-- `Options threads(int threads)`: Set the threads property of the Options instance
-- `Options concurrens(int concurrens)`: Set the concurrens property of the Options instance
-- `Options warmups(int warmups)`: Set the warmups property of the Options instance
-- `Options runs(int runs)`: Set the runs property of the Options instance
-- `Options printErrorLog(boolean printErrorLog)`: Set the printErrorLog property of the Options instance
-- `Options outputs(MeasureOutput... measureOutputs)`: Set the outputs property of the Options instance
+- `boolean valid()`: 校验Options相关参数是否合法
+- `Options named(String name)`: 设置 Options 实例的 name 属性
+- `Options threads(int threads)`: 设置 Options 实例的 threads 属性
+- `Options concurrens(int concurrens)`: 设置 Options 实例的 concurrens 属性
+- `Options warmups(int warmups)`: 设置 Options 实例的 warmups 属性
+- `Options runs(int runs)`: 设置 Options 实例的 runs 属性
+- `Options printErrorLog(boolean printErrorLog)`: 设置 Options 实例的 printErrorLog 属性
+- `Options outputs(MeasureOutput... measureOutputs)`: 自定义设置 Options 实例的 MeasureOutput 输出通道
 
-### Assert
+### Assert类
 
-The Assert is mainly used for assertion use.
+Assert类主要用来做断言使用。
 
-#### Demo
+#### 示例
 
 ```java
 Assert.assertFaster(Options.of(),
@@ -175,6 +175,6 @@ Assert.assertFaster(Options.of(),
         () -> new MyTestService().hello());
 ```
 
-## License
+## 许可证
 
-This [stalker](https://github.com/blinkfox/stalker) library is open sourced under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+本 [stalker](https://github.com/blinkfox/stalker) 类库遵守 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0) 许可证。

@@ -28,10 +28,9 @@ public class MyTestService {
     }
 
     /**
-     * 测试方法1，模拟业务代码耗时 2~5 ms，且会有约 5% 的几率执行异常.
+     * 测试方法2，模拟业务代码耗时 2 ms.
      */
     public void fastHello() {
-        // 模拟运行占用约 2 ms 的时间.
         this.sleep(2L);
     }
 
