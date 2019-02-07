@@ -122,6 +122,20 @@ The above results will default to the console output:
 +---+-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
 ```
 
+Explanation of results:
+
+- `Costs`: Total time spent on actual official runs
+- `Total`: total number of official runs
+- `Success`: number of successful runs
+- `Failure`: number of failed runs
+- `Sum`: the value after each time-consuming summation of the run
+- `Avg`: arithmetic mean of all running time-consuming results
+- `Min`: the minimum of all running time-consuming results
+- `Max`: the maximum of all running time-consuming results
+- `StdDev`: standard deviation of all running time-consuming results
+- `95% LowerConfidence`: minimum boundary value for 95% confidence interval
+- `95% LowerConfidence`: maximum boundary value for 95% confidence interval
+
 #### 3. Main methods
 
 - `void run(Runnable... runnables)`: Perform performance measurement evaluation on several code to be executed.
