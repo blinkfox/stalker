@@ -231,6 +231,7 @@ public class Options {
      * 设置需要将结果输出的通道.
      *
      * @param measureOutputs 输出通道的集合.
+     * @return 本 {@link Options} 实例
      */
     public Options outputs(MeasureOutput... measureOutputs) {
         if (this.outputs == null) {
@@ -245,6 +246,7 @@ public class Options {
      * 设置需要将结果输出的通道.
      *
      * @param outputs 输出通道的集合.
+     * @return 本 {@link Options} 实例
      */
     public Options outputs(List<MeasureOutput> outputs) {
         this.outputs = outputs;
