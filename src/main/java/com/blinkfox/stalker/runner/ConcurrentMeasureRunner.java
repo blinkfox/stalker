@@ -23,6 +23,8 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
 
     private static final Logger log = LoggerFactory.getLogger(ConcurrentMeasureRunner.class);
 
+    private static final int N_1024 = 1024;
+
     /** 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns). */
     private Queue<Long> eachMeasures;
 
@@ -64,7 +66,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
         Semaphore semaphore = new Semaphore(concurrens > threads ? threads : concurrens);
         CountDownLatch countDownLatch = new CountDownLatch(threads);
-        ExecutorService executorService = Executors.newFixedThreadPool(threads);
+        ExecutorService executorService = Executors.newFixedThreadPool(threads > N_1024 ? N_1024 : threads);
         final long start = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
