@@ -18,7 +18,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -143,17 +143,17 @@ Stalker.run(Options.of(1000, 200).warmups(1000).runs(10),
 
 ### Options类
 
-Options表示做性能测量时的选项参数
+Options 表示做性能测量时的选项参数
 
 #### 主要属性如下
 
 - `name`: 选项参数的名称
-- `threads`: 正式执行的线程数，默认为1。
-- `concurrens`: 正式多线程下执行的并发数，默认为1。
-- `warmups`: 单线程下的预热次数，默认5。
-- `runs`: 每个线程正式执行的次数，默认10。
-- `printErrorLog`: 是否打印错误日志，默认false。
-- `outputs`: 将测量结果通过多种方式(集合)输出出来，默认为输出到控制台，可自定义实现`MeasureOutput`接口。
+- `threads`: 正式执行的线程数，默认为 `1`。
+- `concurrens`: 正式多线程下执行的并发数，默认为 `1`。
+- `warmups`: 单线程下的预热次数，默认 `5`。
+- `runs`: 每个线程正式执行的次数，默认 `10`。
+- `printErrorLog`: 是否打印错误日志，默认 `false`。
+- `outputs`: 将测量结果通过多种方式(集合)输出出来，默认为输出到控制台，可自定义实现 `MeasureOutput` 接口。
 
 #### 主要方法
 
@@ -168,7 +168,7 @@ Options表示做性能测量时的选项参数
 
 其他方法：
 
-- `boolean valid()`: 校验Options相关参数是否合法
+- `boolean valid()`: 校验 Options 相关参数是否合法
 - `Options named(String name)`: 设置 Options 实例的 name 属性
 - `Options threads(int threads)`: 设置 Options 实例的 threads 属性
 - `Options concurrens(int concurrens)`: 设置 Options 实例的 concurrens 属性
@@ -192,3 +192,10 @@ Assert.assertFaster(Options.of(),
 ## 许可证
 
 本 [stalker](https://github.com/blinkfox/stalker) 类库遵守 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0) 许可证。
+
+## 变更日志
+
+- v1.0.1 修复线程创建过多时的限制问题 (2019-09-14)
+  - 修复了线程池超过一定数量后的线程创建失败的问题；
+- v1.0.0 里程碑正式版 (2019-02-08)
+  - 完成了基准性能测试所需的基础功能；

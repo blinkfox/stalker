@@ -18,7 +18,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -192,3 +192,10 @@ Assert.assertFaster(Options.of(),
 ## License
 
 This [stalker](https://github.com/blinkfox/stalker) library is open sourced under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+## Changelog
+
+- v1.0.1 (2019-09-14)
+  - Fixed where thread creation failed after a certain number of thread pools failed;
+- v1.0.0 (2019-02-08)
+  - Completed the basic functionality required for benchmark performance testing;

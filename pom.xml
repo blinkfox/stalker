@@ -6,11 +6,11 @@
 
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>stalker</name>
-    <description>A small library for performance evaluation of Java code.</description>
+    <description>A small library for performance evaluation of Java code. 这是一个用来对Java代码做性能评估的工具库。</description>
     <url>https://github.com/blinkfox/stalker</url>
 
     <licenses>
