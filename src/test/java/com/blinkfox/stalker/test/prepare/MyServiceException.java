@@ -4,6 +4,7 @@ package com.blinkfox.stalker.test.prepare;
  * 测试业务的自定义运行时异常.
  *
  * @author blinkfox on 2019-02-03.
+ * @since v1.0.0
  */
 public class MyServiceException extends RuntimeException {
 

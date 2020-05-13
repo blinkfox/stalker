@@ -1,7 +1,6 @@
 package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Assert;
-
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.junit.Test;
  * AssertTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class AssertTest {
 

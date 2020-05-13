@@ -14,11 +14,6 @@ import lombok.experimental.UtilityClass;
 public class StrKit {
 
     /**
-     * 空字符串.
-     */
-    public static final String EMPTY = "";
-
-    /**
      * 判断给定字符串是否是空字符串.
      *
      * @param s 字符串
@@ -38,12 +33,12 @@ public class StrKit {
         if (objects != null && objects.length > 0) {
             StringBuilder sb = new StringBuilder();
             for (Object o : objects) {
-                sb.append(o == null ? EMPTY : o.toString());
+                sb.append(o == null ? "" : o.toString());
             }
             return sb.toString();
         }
 
-        return EMPTY;
+        return "";
     }
 
     /**
@@ -52,7 +47,7 @@ public class StrKit {
      * @param n 纳秒
      * @return 其他单位的时间字符串
      */
-    public static String convertTime(Number n) {
+    public String convertTime(Number n) {
         double d = n.doubleValue();
         if (d < 1e5) {
             return Long.toString(n.longValue()).concat(" ns");

@@ -3,10 +3,8 @@ package com.blinkfox.stalker.test.config;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.MeasureOutput;
 import com.blinkfox.stalker.output.OutputConsole;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,10 +12,13 @@ import org.junit.Test;
  * OptionsTest.
  *
  * @author blinkfox on 2019-02-03.
+ * @since v1.0.0
  */
 public class OptionsTest {
 
-    /** 用来表示此次测量名称的常量. */
+    /**
+     * 用来表示此次测量名称的常量.
+     */
     private static final String NAME = "test";
 
     /**

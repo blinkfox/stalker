@@ -3,7 +3,6 @@ package com.blinkfox.stalker.test.result.bean;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.result.bean.StatisResult;
-
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -12,6 +11,7 @@ import org.junit.Test;
  * MeasurementTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class MeasurementTest {
 

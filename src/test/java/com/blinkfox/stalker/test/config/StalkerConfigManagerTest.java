@@ -2,7 +2,6 @@ package com.blinkfox.stalker.test.config;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.StalkerConfigManager;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +9,7 @@ import org.junit.Test;
  * StalkerConfigManagerTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class StalkerConfigManagerTest {
 

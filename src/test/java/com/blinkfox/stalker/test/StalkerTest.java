@@ -3,13 +3,13 @@ package com.blinkfox.stalker.test;
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.test.prepare.MyTestService;
-
 import org.junit.Test;
 
 /**
  * StalkerTest.
  *
  * @author blinkfox on 2019-02-03.
+ * @since v1.0.0
  */
 public class StalkerTest {
 
@@ -61,7 +61,7 @@ public class StalkerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void runWithEmptyRunnalbs() {
-        Runnable[] runnables = new Runnable[]{};
+        Runnable[] runnables = new Runnable[] {};
         Stalker.run(Options.of(), runnables);
     }
 

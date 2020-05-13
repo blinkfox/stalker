@@ -9,6 +9,7 @@ import org.junit.Test;
  * DefaultMeasureStatisTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class DefaultMeasureStatisTest {
 
@@ -17,7 +18,7 @@ public class DefaultMeasureStatisTest {
         OverallResult overallResult = new OverallResult();
         Assert.assertEquals(0L, new DefaultMeasureStatis().statis(overallResult).getSum());
 
-        overallResult.setEachMeasures(new long[]{});
+        overallResult.setEachMeasures(new long[] {});
         Assert.assertEquals(0L, new DefaultMeasureStatis().statis(overallResult).getSum());
     }
 

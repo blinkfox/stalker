@@ -1,7 +1,6 @@
 package com.blinkfox.stalker.test.kit;
 
 import com.blinkfox.stalker.kit.StrKit;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,6 +8,7 @@ import org.junit.Test;
  * StrKitTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class StrKitTest {
 
@@ -27,9 +27,9 @@ public class StrKitTest {
      */
     @Test
     public void join() {
-        Assert.assertEquals(StrKit.EMPTY, StrKit.join(null));
-        Assert.assertEquals(StrKit.EMPTY, StrKit.join(""));
-        Assert.assertEquals(StrKit.EMPTY, StrKit.join(null, ""));
+        Assert.assertEquals("", StrKit.join(null));
+        Assert.assertEquals("", StrKit.join(""));
+        Assert.assertEquals("", StrKit.join(null, ""));
         Assert.assertEquals("ab", StrKit.join("a", null, "b"));
     }
 
@@ -47,4 +47,5 @@ public class StrKitTest {
         Assert.assertEquals("5.0 h", StrKit.convertTime(18_000_000_000_000L));
         Assert.assertEquals("3.0 d", StrKit.convertTime(259_200_000_000_000L));
     }
+
 }

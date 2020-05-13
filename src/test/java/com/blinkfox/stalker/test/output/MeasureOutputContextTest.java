@@ -5,16 +5,15 @@ import com.blinkfox.stalker.output.MeasureOutput;
 import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.result.bean.OverallResult;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Test;
 
 /**
  * MeasureOutputContextTest.
  *
  * @author blinkfox on 2019-02-04.
+ * @since v1.0.0
  */
 public class MeasureOutputContextTest {
 
