@@ -20,9 +20,7 @@ public class StalkerTest {
      */
     @Test
     public void runWithoutOptions() {
-        List<Object> results = Stalker.run(() -> new MyTestService().hello());
-        Assert.assertEquals(1, results.size());
-        Assert.assertNotNull(results.get(0));
+        Assert.assertTrue(Stalker.run(() -> new MyTestService().hello()).size() > 0);
     }
 
     /**
