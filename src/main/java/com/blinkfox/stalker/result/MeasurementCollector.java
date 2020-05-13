@@ -11,6 +11,7 @@ import com.blinkfox.stalker.result.statis.DefaultMeasureStatis;
  * 测量结果信息的收集器类，即将测量结果、统计结果等收集、整合起来.
  *
  * @author blinkfox on 2019-01-22.
+ * @since v1.0.0
  */
 public final class MeasurementCollector {
 

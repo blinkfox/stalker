@@ -7,16 +7,18 @@ import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
 
 /**
- * Stalker的主API使用类.
+ * Stalker 的主 API 使用类.
  *
- * @author blinkfox on 2019-1-2.
+ * @author blinkfox on 2019-01-02.
+ * @since v1.0.0
  */
 public final class Stalker {
 
     /**
      * 私有构造方法.
      */
-    private Stalker() {}
+    private Stalker() {
+    }
 
     /**
      * 测量要执行的代码的性能评估.

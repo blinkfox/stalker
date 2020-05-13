@@ -6,7 +6,8 @@ import com.blinkfox.stalker.result.bean.StatisResult;
 /**
  * 测量结果统计接口.
  *
- * @author blinkfox on 2019-1-10.
+ * @author blinkfox on 2019-01-10.
+ * @since v1.0.0
  */
 public interface MeasureStatis {
 

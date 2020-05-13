@@ -6,7 +6,8 @@ import com.blinkfox.stalker.result.bean.Measurement;
 /**
  * 将最终的测量统计结果输出出来.
  *
- * @author blinkfox on 2019-1-11.
+ * @author blinkfox on 2019-01-11.
+ * @since v1.0.0
  */
 public interface MeasureOutput {
 

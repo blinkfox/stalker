@@ -5,31 +5,31 @@ import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.StrKit;
 import com.blinkfox.stalker.result.bean.EasyReadResult;
 import com.blinkfox.stalker.result.bean.Measurement;
-
 import java.util.Arrays;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 在控制台输出结果的实现类.
- * <p>控制台输出的结果示例如下：</p>
- * +--------------------------------------------------------------------------------------------------------------------------------------+
- * |                               threads: 1000, concurrens: 100, warmups:5, runs: 5, printErrorLog: false                               |
- * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
- * |   Costs   | Total | Success | Failure |   Sum   |   Avg   |   Min   |   Max    | StdDev  | 95% LowerConfidence | 95% UpperConfidence |
- * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
- * | 397.15 ms | 5000  |  4968   |   32    | 23.44 s | 4.72 ms | 2.01 ms | 13.26 ms | 1.81 ms |       4.67 ms       |       4.77 ms       |
- * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
  *
- * @author blinkfox on 2019-1-11.
+ * <p>控制台输出的结果示例如下：</p>
+ * +----------------------------------------------------------------------------------------------------------------+
+ * |                     threads: 1000, concurrens: 100, warmups:5, runs: 5, printErrorLog: false                   |
+ * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+
+ * |   Costs   | Total | Success | Failure |   Sum   |   Avg   |   Min   |   Max    | StdDev  | 95% LowerConfidence |
+ * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+
+ * | 397.15 ms | 5000  |  4968   |   32    | 23.44 s | 4.72 ms | 2.01 ms | 13.26 ms | 1.81 ms |       4.67 ms       |
+ * +-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+
+ *
+ * @author blinkfox on 2019-01-11.
+ * @since v1.0.0
  */
+@Slf4j
 public class OutputConsole implements MeasureOutput {
 
-    private static final Logger log = LoggerFactory.getLogger(OutputConsole.class);
-
-    /** 表头数据的数组. */
+    /**
+     * 表头数据的数组.
+     */
     private static final List<String> HEADERS = Arrays.asList("", "Costs", "Total", "Success", "Failure",
             "Sum", "Avg", "Min", "Max", "StdDev", "95% LowerConfidence", "95% UpperConfidence");
 

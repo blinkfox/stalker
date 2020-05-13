@@ -7,6 +7,7 @@ import com.blinkfox.stalker.result.bean.OverallResult;
  * 用于测量待执行方法耗时情况等信息的运行器接口.
  *
  * @author blinkfox on 2019-01-08.
+ * @since v1.0.0
  */
 public interface MeasureRunner {
 

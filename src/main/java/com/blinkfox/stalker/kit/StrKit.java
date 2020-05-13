@@ -2,21 +2,21 @@ package com.blinkfox.stalker.kit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import lombok.experimental.UtilityClass;
 
 /**
  * 字符串操作工具类.
  *
- * @author blinkfox on 2019-1-10.
+ * @author blinkfox on 2019-01-10.
+ * @since v1.0.0
  */
-public final class StrKit {
-
-    /** 空字符串. */
-    public static final String EMPTY = "";
+@UtilityClass
+public class StrKit {
 
     /**
-     * 私有构造方法.
+     * 空字符串.
      */
-    private StrKit() {}
+    public static final String EMPTY = "";
 
     /**
      * 判断给定字符串是否是空字符串.
@@ -24,7 +24,7 @@ public final class StrKit {
      * @param s 字符串
      * @return 布尔值
      */
-    public static boolean isEmpty(String s) {
+    public boolean isEmpty(String s) {
         return s == null || s.length() == 0;
     }
 
@@ -34,7 +34,7 @@ public final class StrKit {
      * @param objects 不定参数对象
      * @return 字符串
      */
-    public static String join(Object... objects) {
+    public String join(Object... objects) {
         if (objects != null && objects.length > 0) {
             StringBuilder sb = new StringBuilder();
             for (Object o : objects) {
@@ -76,9 +76,8 @@ public final class StrKit {
      * @param unit 时间单位字符串
      * @return 四舍五入后的时间字符串
      */
-    private static String getRoundString(double d, String unit) {
-        return join(BigDecimal.valueOf(d)
-                .setScale(2, RoundingMode.HALF_UP).doubleValue(), " ", unit);
+    private String getRoundString(double d, String unit) {
+        return join(BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).doubleValue(), " ", unit);
     }
 
 }

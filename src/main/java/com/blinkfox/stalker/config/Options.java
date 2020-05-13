@@ -1,40 +1,58 @@
 package com.blinkfox.stalker.config;
 
 import com.blinkfox.stalker.output.MeasureOutput;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * 性能测试参数选项实体类.
  *
- * @author blinkfox on 2019-1-2.
+ * @author blinkfox on 2019-01-02.
+ * @since v1.0.0
  */
+@Getter
 public class Options {
 
-    /** 进行测量的名称，便于和其他执行的测量作区分. */
+    /**
+     * 进行测量的名称，便于和其他执行的测量作区分.
+     */
     private String name;
 
-    /** 执行的线程数. */
+    /**
+     * 执行的线程数.
+     */
     private int threads;
 
-    /** 执行的并发数. */
+    /**
+     * 执行的并发数.
+     */
     private int concurrens;
 
-    /** 执行前的预热次数. */
+    /**
+     * 执行前的预热次数.
+     */
     private int warmups;
 
-    /** 执行的运行次数. */
+    /**
+     * 执行的运行次数.
+     */
     private int runs;
 
-    /** 是否打印出执行错误(异常运行)的日志，默认是false. */
+    /**
+     * 是否打印出执行错误(异常运行)的日志，默认是false.
+     */
     private boolean printErrorLog;
 
-    /** 将测量结果通过多种方式输出出来的集合. */
+    /**
+     * 将测量结果通过多种方式输出出来的集合.
+     */
     private List<MeasureOutput> outputs;
 
-    /** 校验失败时的提示消息. */
+    /**
+     * 校验失败时的提示消息.
+     */
     private String message;
 
     /**
@@ -251,36 +269,6 @@ public class Options {
     public Options outputs(List<MeasureOutput> outputs) {
         this.outputs = outputs;
         return this;
-    }
-
-    /* getter 方法. */
-
-    public String getName() {
-        return name;
-    }
-
-    public int getThreads() {
-        return threads;
-    }
-
-    public int getConcurrens() {
-        return concurrens;
-    }
-
-    public int getWarmups() {
-        return warmups;
-    }
-
-    public int getRuns() {
-        return runs;
-    }
-
-    public boolean isPrintErrorLog() {
-        return printErrorLog;
-    }
-
-    public List<MeasureOutput> getOutputs() {
-        return outputs;
     }
 
 }

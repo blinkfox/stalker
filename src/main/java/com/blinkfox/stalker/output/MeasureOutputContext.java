@@ -2,20 +2,17 @@ package com.blinkfox.stalker.output;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.Measurement;
-
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 用于输出测量结果的上下文.
  *
  * @author blinkfox on 2019-01-22.
+ * @since v1.0.0
  */
+@Slf4j
 public final class MeasureOutputContext {
-
-    private static final Logger log = LoggerFactory.getLogger(MeasureOutputContext.class);
 
     /**
      * 将测量的相关参数和统计结果等信息输出出来.

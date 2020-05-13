@@ -6,13 +6,18 @@ import com.blinkfox.stalker.output.OutputConsole;
  * Stalker 单例的全局配置管理类.
  *
  * @author blinkfox on 2019-01-30.
+ * @since v1.0.0
  */
 public final class StalkerConfigManager {
 
-    /** 全局唯一的 StalkerConfigManager 实例. */
+    /**
+     * 全局唯一的 StalkerConfigManager 实例.
+     */
     private static final StalkerConfigManager stalkerConfigManager = new StalkerConfigManager();
 
-    /** 全局默认的选项参数. */
+    /**
+     * 全局默认的选项参数.
+     */
     private Options defaultOptions;
 
     /**

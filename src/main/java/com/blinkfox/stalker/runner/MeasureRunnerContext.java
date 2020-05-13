@@ -3,21 +3,21 @@ package com.blinkfox.stalker.runner;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.StrKit;
 import com.blinkfox.stalker.result.bean.OverallResult;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 待执行的实例方法在各种线程情形中运行实现类的上下文.
  *
  * @author blinkfox on 2019-01-08.
+ * @since v1.0.0
  */
+@Slf4j
 public final class MeasureRunnerContext {
 
-    private static final Logger log = LoggerFactory.getLogger(MeasureRunnerContext.class);
-
-    /** 运行测量的性能参数配置选项. */
-    private Options options;
+    /**
+     * 运行测量的性能参数配置选项.
+     */
+    private final Options options;
 
     /**
      * 基于Options的构造方法，其中需要对options参数的合法性做校验.

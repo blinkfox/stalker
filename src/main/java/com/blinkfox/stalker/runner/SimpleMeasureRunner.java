@@ -2,29 +2,35 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 当待执行的实例方法是简单(单线程)情况时的测量运行实现类.
  *
  * @author blinkfox on 2019-01-08.
+ * @since v1.0.0
  */
+@Slf4j
 public class SimpleMeasureRunner implements MeasureRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(SimpleMeasureRunner.class);
-
-    /** 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns). */
+    /**
+     * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
+     */
     private long[] eachMeasures;
 
-    /** 测量过程中执行的总次数. */
+    /**
+     * 测量过程中执行的总次数.
+     */
     private int total;
 
-    /** 测量过程中执行成功的次数. */
+    /**
+     * 测量过程中执行成功的次数.
+     */
     private int success;
 
-    /** 测量过程中执行失败的次数. */
+    /**
+     * 测量过程中执行失败的次数.
+     */
     private int failure;
 
     /**

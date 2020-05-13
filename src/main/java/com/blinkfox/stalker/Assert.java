@@ -2,23 +2,21 @@ package com.blinkfox.stalker;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
+import lombok.experimental.UtilityClass;
 
 /**
  * 关于性能测量和评估的断言.
  *
  * @author blinkfox on 2019-01-23.
+ * @since v1.0.0
  */
-public final class Assert {
-
-    /**
-     * 私有构造方法，防止new.
-     */
-    private Assert() {}
+@UtilityClass
+public class Assert {
 
     /**
      * 测试失败.
      */
-    public static void fail() {
+    public void fail() {
         throw new AssertionError();
     }
 
@@ -29,7 +27,7 @@ public final class Assert {
      * @param runnable1 可运行实例1
      * @param runnable2 可运行实例2
      */
-    public static void assertFaster(Options options, Runnable runnable1, Runnable runnable2) {
+    public void assertFaster(Options options, Runnable runnable1, Runnable runnable2) {
         MeasureRunnerContext runnerContext = new MeasureRunnerContext(options);
         if (calcSum(runnerContext.run(runnable1).getEachMeasures())
                 >= calcSum(runnerContext.run(runnable2).getEachMeasures())) {
@@ -43,7 +41,7 @@ public final class Assert {
      * @param arr long数组
      * @return 总和
      */
-    private static long calcSum(long[] arr) {
+    private long calcSum(long[] arr) {
         int sum = 0;
         if (arr != null && arr.length > 0) {
             for (long n : arr) {

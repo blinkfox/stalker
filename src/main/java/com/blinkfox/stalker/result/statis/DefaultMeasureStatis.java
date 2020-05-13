@@ -6,11 +6,14 @@ import com.blinkfox.stalker.result.bean.StatisResult;
 /**
  * 默认的测量结果统计实现.
  *
- * @author blinkfox on 2019-1-10.
+ * @author blinkfox on 2019-01-10.
+ * @since v1.0.0
  */
 public class DefaultMeasureStatis implements MeasureStatis {
 
-    /** 95%置信区间的 Z 值. */
+    /**
+     * 95%置信区间的 Z 值.
+     */
     private static final double Z = 1.96;
 
     /**

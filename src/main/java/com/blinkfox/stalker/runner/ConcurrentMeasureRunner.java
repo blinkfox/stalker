@@ -2,7 +2,6 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
-
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -10,31 +9,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 当待执行的实例方法是在多线程并发情况时的测量运行实现类.
  *
  * @author blinkfox on 2019-01-08.
+ * @since v1.0.0
  */
+@Slf4j
 public class ConcurrentMeasureRunner implements MeasureRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(ConcurrentMeasureRunner.class);
 
     private static final int N_1024 = 1024;
 
-    /** 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns). */
+    /**
+     * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
+     */
     private Queue<Long> eachMeasures;
 
-    /** 测量过程中执行的总次数. */
+    /**
+     * 测量过程中执行的总次数.
+     */
     private AtomicInteger total;
 
-    /** 测量过程中执行成功的次数. */
+    /**
+     * 测量过程中执行成功的次数.
+     */
     private AtomicInteger success;
 
-    /** 测量过程中执行失败的次数. */
+    /**
+     * 测量过程中执行失败的次数.
+     */
     private AtomicInteger failure;
 
     /**
@@ -52,7 +57,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
     /**
      * 执行 runnable 方法，并将执行结果的耗时纳秒(ns)值存入结果对象中.
      *
-     * @param options  运行的配置选项实例
+     * @param options 运行的配置选项实例
      * @param runnable 可运行实例
      * @return 测量结果
      */
