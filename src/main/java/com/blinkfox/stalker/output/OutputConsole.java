@@ -40,9 +40,11 @@ public class OutputConsole implements MeasureOutput {
      * @param measurements 多种测量结果
      */
     @Override
-    public void output(Options options, Measurement... measurements) {
-        // 打印结果.
-        log.warn("\n{}", this.getRenderResult(options, measurements));
+    public Object output(Options options, Measurement... measurements) {
+        // 渲染并打印结果.
+        String result = this.getRenderResult(options, measurements);
+        log.warn("\n{}", result);
+        return result;
     }
 
     /**

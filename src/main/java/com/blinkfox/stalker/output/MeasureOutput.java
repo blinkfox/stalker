@@ -16,7 +16,8 @@ public interface MeasureOutput {
      *
      * @param options 测量的选项参数
      * @param measurements 多种测量结果
+     * @return 输出结果
      */
-    void output(Options options, Measurement... measurements);
+    Object output(Options options, Measurement... measurements);
 
 }

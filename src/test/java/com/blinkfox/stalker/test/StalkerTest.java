@@ -3,6 +3,8 @@ package com.blinkfox.stalker.test;
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.test.prepare.MyTestService;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -18,7 +20,9 @@ public class StalkerTest {
      */
     @Test
     public void runWithoutOptions() {
-        Stalker.run(() -> new MyTestService().hello());
+        List<Object> results = Stalker.run(() -> new MyTestService().hello());
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0));
     }
 
     /**
