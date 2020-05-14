@@ -8,7 +8,7 @@
 
 ## Features
 
-- Lightweight (jar package is only '26kb')
+- Lightweight (jar package is only '27kb')
 - API are simple and easy to use. 
 - Easy integration or expansion
 
@@ -18,7 +18,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -34,9 +34,8 @@ Before doing performance testing on Java methods, prepare the test service class
  *
  * @author blinkfox on 2019-02-03.
  */
+@Slf4j
 public class MyTestService {
-
-    private static final Logger log = LoggerFactory.getLogger(MyTestService.class);
 
     /**
      * Test Method 1, the simulation of the business code takes 2~5 ms, 
@@ -97,6 +96,18 @@ The above results will default to the console output:
 +---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
 | 1 | 35.33 ms |  10   |   10    |    0    | 35.29 ms | 3.53 ms | 2.56 ms | 4.81 ms | 0.85 ms |       3.0 ms        |       4.06 ms       |
 +---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
+```
+
+You can also get statistical results:
+
+```java
+// Get running statistics.
+Measurement[] measurements = mStalker.runStatis(() -> new MyTestService().hello());
+
+// Get the MeasureOutput result specified in the running Options. 
+// The default is the string content of the ASCII table output in the console log. 
+// It can be multiple results, so return the collection.
+List<Object> measurements = mStalker.run(() -> new MyTestService().hello());
 ```
 
 #### 2. More complete example
@@ -195,7 +206,10 @@ This [stalker](https://github.com/blinkfox/stalker) library is open sourced unde
 
 ## Changelog
 
-- v1.0.1 (2019-09-14)
+-v1.1.0 fixes the limitation when creating too many threads (2020-05-14)
+  - Added the ability to output results in `MeasureOutput`, and the default run method will also return its results;
+  - Added `runStatis` method, you can get the original statistical result data;
+- v1.0.1 Fix the limitation problem when too many threads created (2019-09-14)
   - Fixed where thread creation failed after a certain number of thread pools failed;
-- v1.0.0 (2019-02-08)
+- v1.0.0 Milestone version (2019-02-08)
   - Completed the basic functionality required for benchmark performance testing;

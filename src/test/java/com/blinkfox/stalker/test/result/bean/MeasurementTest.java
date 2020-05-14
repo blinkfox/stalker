@@ -17,6 +17,9 @@ public class MeasurementTest {
 
     private static Measurement measurement;
 
+    /**
+     * 初始化.
+     */
     @BeforeClass
     public static void init() {
         measurement = new Measurement(new OverallResult());

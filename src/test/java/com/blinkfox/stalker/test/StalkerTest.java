@@ -35,7 +35,7 @@ public class StalkerTest {
      */
     @Test
     public void runMultiRunnables() {
-        Stalker.run(Options.of(1024, 200).warmups(1000).runs(10),
+        Stalker.run(Options.of(1024, 200).warmups(10).runs(5),
                 () -> new MyTestService().hello(),
                 () -> new MyTestService().fastHello());
     }

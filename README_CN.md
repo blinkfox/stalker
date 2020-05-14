@@ -8,7 +8,7 @@
 
 ## 特性
 
-- 轻量级（jar包仅`26kb`）
+- 轻量级（jar包仅`27kb`）
 - API简单易用
 - 易于集成或扩展
 
@@ -18,7 +18,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -34,9 +34,8 @@
  *
  * @author blinkfox on 2019-02-03.
  */
+@Slf4j
 public class MyTestService {
-
-    private static final Logger log = LoggerFactory.getLogger(MyTestService.class);
 
     /**
      * 测试方法1，模拟业务代码耗时 2~5 ms，且会有约 1% 的几率执行异常.
@@ -97,6 +96,16 @@ public static void main(String[] args) {
 +---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
 | 1 | 35.33 ms |  10   |   10    |    0    | 35.29 ms | 3.53 ms | 2.56 ms | 4.81 ms | 0.85 ms |       3.0 ms        |       4.06 ms       |
 +---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
+```
+
+也可以获取到统计结果:
+
+```java
+// 获取运行的统计结果.
+Measurement[] measurements = mStalker.runStatis(() -> new MyTestService().hello());
+
+// 获取运行的 Options 中指定的 MeasureOutput 结果，默认是控制台中输出的 ASCII 表格的字符串内容，可以是多个结果，所以返回集合.
+List<Object> measurements = mStalker.run(() -> new MyTestService().hello());
 ```
 
 #### 2. 更全示例
@@ -195,6 +204,9 @@ Assert.assertFaster(Options.of(),
 
 ## 变更日志
 
+- v1.1.0 修复线程创建过多时的限制问题 (2020-05-14)
+  - 新增了 `MeasureOutput` 中可输出结果的功能，且默认的 run 方法，也会返回其结果；
+  - 新增了 `runStatis` 方法，可以拿到原始的统计结果数据；
 - v1.0.1 修复线程创建过多时的限制问题 (2019-09-14)
   - 修复了线程池超过一定数量后的线程创建失败的问题；
 - v1.0.0 里程碑正式版 (2019-02-08)

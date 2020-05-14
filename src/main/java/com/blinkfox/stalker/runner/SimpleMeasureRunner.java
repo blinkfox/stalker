@@ -59,7 +59,7 @@ public class SimpleMeasureRunner implements MeasureRunner {
             } catch (RuntimeException e) {
                 this.failure++;
                 if (printErrorLog) {
-                    log.error("测量方法耗时信息出错!", e);
+                    log.error("【stalker 错误】测量方法耗时信息出错!", e);
                 }
             }
         }

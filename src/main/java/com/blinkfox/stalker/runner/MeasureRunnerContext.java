@@ -37,7 +37,7 @@ public final class MeasureRunnerContext {
      */
     private void warmup(Options options, Runnable runnable) {
         final boolean printErrorLog = options.isPrintErrorLog();
-        log.debug("预热开始...");
+        log.debug("【stalker 提示】预热开始...");
         long start = System.nanoTime();
 
         // 循环执行预热次数的方法.
@@ -47,13 +47,13 @@ public final class MeasureRunnerContext {
             } catch (RuntimeException e) {
                 // 预热时的异常日志，根据配置选项的参数值来看是否输出错误日志.
                 if (printErrorLog) {
-                    log.error("测量方法前进行预热时出错!", e);
+                    log.error("【stalker 错误】测量方法前进行预热时出错!", e);
                 }
             }
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("预热完毕，预热期间耗时: {}.", StrKit.convertTime(System.nanoTime() - start));
+            log.debug("【stalker 提示】预热完毕，预热期间耗时: {}.", StrKit.convertTime(System.nanoTime() - start));
         }
     }
 

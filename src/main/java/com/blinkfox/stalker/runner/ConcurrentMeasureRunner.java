@@ -25,22 +25,22 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
     /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
      */
-    private Queue<Long> eachMeasures;
+    private final Queue<Long> eachMeasures;
 
     /**
      * 测量过程中执行的总次数.
      */
-    private AtomicInteger total;
+    private final AtomicInteger total;
 
     /**
      * 测量过程中执行成功的次数.
      */
-    private AtomicInteger success;
+    private final AtomicInteger success;
 
     /**
      * 测量过程中执行失败的次数.
      */
-    private AtomicInteger failure;
+    private final AtomicInteger failure;
 
     /**
      * 构造方法.
@@ -69,9 +69,9 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
         boolean printErrorLog = options.isPrintErrorLog();
 
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
-        Semaphore semaphore = new Semaphore(concurrens > threads ? threads : concurrens);
+        Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
         CountDownLatch countDownLatch = new CountDownLatch(threads);
-        ExecutorService executorService = Executors.newFixedThreadPool(threads > N_1024 ? N_1024 : threads);
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
         final long start = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.

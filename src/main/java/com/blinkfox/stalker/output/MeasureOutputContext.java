@@ -21,13 +21,13 @@ public final class MeasureOutputContext {
      *
      * @param options 测量的选项参数
      * @param measurements 多种测量结果
-     * @return 各个输出结果的集合
+     * @return 各个输出结果的集合，v1.1.0 新增的返回结果
      */
     public List<Object> output(Options options, Measurement... measurements) {
         // 如果没有指定任何输出形式，则默认将结果输出到控制台中.
         List<MeasureOutput> outputs = options.getOutputs();
         if (outputs == null || outputs.isEmpty()) {
-            log.warn("你没有指定输出结果，将输出空集合.");
+            log.warn("【stalker 警示】你没有指定输出结果，将输出空集合.");
             return Collections.emptyList();
         }
 
