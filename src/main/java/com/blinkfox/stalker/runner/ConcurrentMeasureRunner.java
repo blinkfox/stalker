@@ -1,6 +1,7 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.kit.MathKit;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -8,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,17 +31,17 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
     /**
      * 测量过程中执行的总次数.
      */
-    private final AtomicInteger total;
+    private final AtomicLong total;
 
     /**
      * 测量过程中执行成功的次数.
      */
-    private final AtomicInteger success;
+    private final AtomicLong success;
 
     /**
      * 测量过程中执行失败的次数.
      */
-    private final AtomicInteger failure;
+    private final AtomicLong failure;
 
     /**
      * 构造方法.
@@ -49,9 +50,9 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      */
     public ConcurrentMeasureRunner() {
         this.eachMeasures = new ConcurrentLinkedQueue<>();
-        this.total = new AtomicInteger(0);
-        this.success = new AtomicInteger(0);
-        this.failure = new AtomicInteger(0);
+        this.total = new AtomicLong(0);
+        this.success = new AtomicLong(0);
+        this.failure = new AtomicLong(0);
     }
 
     /**
@@ -151,12 +152,14 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
             measures[i] = eachMeasures.remove();
         }
 
+        long totalCount = this.total.get();
         return new OverallResult()
                 .setEachMeasures(measures)
                 .setCosts(costs)
-                .setTotal(this.total.get())
+                .setTotal(totalCount)
                 .setSuccess(this.success.get())
-                .setFailure(this.failure.get());
+                .setFailure(this.failure.get())
+                .setThroughput(MathKit.calcThroughput(totalCount, costs));
     }
 
 }

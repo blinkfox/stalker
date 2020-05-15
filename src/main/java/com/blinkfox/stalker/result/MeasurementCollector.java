@@ -42,6 +42,7 @@ public final class MeasurementCollector {
         easyReadResult.setTotal(overallResult.getTotal());
         easyReadResult.setSuccess(overallResult.getSuccess());
         easyReadResult.setFailure(overallResult.getFailure());
+        easyReadResult.setThroughput(StrKit.roundToString(overallResult.getThroughput()));
 
         easyReadResult.setSum(StrKit.convertTime(statisResult.getSum()));
         easyReadResult.setAvg(StrKit.convertTime(statisResult.getAvg()));

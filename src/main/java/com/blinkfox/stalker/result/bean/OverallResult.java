@@ -29,17 +29,24 @@ public class OverallResult {
     /**
      * 测量过程中执行的总次数.
      */
-    private int total;
+    private long total;
 
     /**
      * 测量过程中执行成功的次数.
      */
-    private int success;
+    private long success;
 
     /**
      * 测量过程中执行失败的次数.
      */
-    private int failure;
+    private long failure;
+
+    /**
+     * 吞吐率，指单位时间内（每秒）的执行总次数，即：{@code throughput = total / (costs / 10^9)}.
+     *
+     * @since v1.1.1
+     */
+    private double throughput;
 
     /**
      * 将该对象转换字符串.
@@ -53,6 +60,7 @@ public class OverallResult {
                 ", total = ", this.total,
                 ", success = ", this.success,
                 ", failure = ", this.failure,
+                ", throughput = ", this.throughput,
                 "}");
     }
 

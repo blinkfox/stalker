@@ -1,6 +1,7 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.kit.MathKit;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,17 +22,17 @@ public class SimpleMeasureRunner implements MeasureRunner {
     /**
      * 测量过程中执行的总次数.
      */
-    private int total;
+    private long total;
 
     /**
      * 测量过程中执行成功的次数.
      */
-    private int success;
+    private long success;
 
     /**
      * 测量过程中执行失败的次数.
      */
-    private int failure;
+    private long failure;
 
     /**
      * 执行 runnable 方法，并将执行成功与否、耗时结果等信息存入到 OverallResult 实体对象中.
@@ -43,13 +44,13 @@ public class SimpleMeasureRunner implements MeasureRunner {
      */
     @Override
     public OverallResult run(Options options, Runnable runnable) {
-        int runs = options.getRuns();
         boolean printErrorLog = options.isPrintErrorLog();
-        this.eachMeasures = new long[runs];
+        int totalCount = options.getThreads() * options.getRuns();
+        this.eachMeasures = new long[totalCount];
         final long start = System.nanoTime();
 
         // 单线程循环执行 runs 次.
-        for (int i = 0; i < runs; i++) {
+        for (int i = 0; i < totalCount; ++i) {
             this.total++;
             try {
                 long eachStart = System.nanoTime();
@@ -79,7 +80,8 @@ public class SimpleMeasureRunner implements MeasureRunner {
                 .setCosts(costs)
                 .setTotal(this.total)
                 .setSuccess(this.success)
-                .setFailure(this.failure);
+                .setFailure(this.failure)
+                .setThroughput(MathKit.calcThroughput(this.total, costs));
     }
 
 }

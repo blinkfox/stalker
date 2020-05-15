@@ -48,4 +48,16 @@ public class StrKitTest {
         Assert.assertEquals("3.0 d", StrKit.convertTime(259_200_000_000_000L));
     }
 
+    /**
+     * 测试 convertTime 方法.
+     */
+    @Test
+    public void getRoundString() {
+        Assert.assertEquals("3621.00", StrKit.roundToString(3_621));
+        Assert.assertEquals("2.53", StrKit.roundToString(2.52832));
+        Assert.assertEquals("32723.10", StrKit.roundToString(32723.1));
+        Assert.assertEquals("36.12", StrKit.roundToString(36.12));
+        Assert.assertEquals("27.00", StrKit.roundToString(26.998));
+    }
+
 }

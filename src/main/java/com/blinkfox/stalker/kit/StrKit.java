@@ -52,15 +52,15 @@ public class StrKit {
         if (d < 1e5) {
             return Long.toString(n.longValue()).concat(" ns");
         } else if (d >= 1e4 && d < 1e9) {
-            return getRoundString(d / 1e6, "ms");
+            return roundToString(d / 1e6, "ms");
         } else if (d >= 1e9 && d < 6e10) {
-            return getRoundString(d / 1e9, "s");
+            return roundToString(d / 1e9, "s");
         } else if (d >= 6e10 && d < 36e11) {
-            return getRoundString(d / 6e10, "min");
+            return roundToString(d / 6e10, "min");
         } else if (d >= 36e11 && d < 864e11) {
-            return getRoundString(d / 36e11, "h");
+            return roundToString(d / 36e11, "h");
         } else {
-            return getRoundString(d / 864e11, "d");
+            return roundToString(d / 864e11, "d");
         }
     }
 
@@ -71,8 +71,18 @@ public class StrKit {
      * @param unit 时间单位字符串
      * @return 四舍五入后的时间字符串
      */
-    private String getRoundString(double d, String unit) {
+    private String roundToString(double d, String unit) {
         return join(BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).doubleValue(), " ", unit);
+    }
+
+    /**
+     * 对 double 类型的值进行四舍五入，并返回四舍五入的字符串值.
+     *
+     * @param d double值
+     * @return 四舍五入后的字符串
+     */
+    public String roundToString(double d) {
+        return BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).toString();
     }
 
 }

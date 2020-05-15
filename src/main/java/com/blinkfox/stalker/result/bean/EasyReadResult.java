@@ -21,17 +21,24 @@ public class EasyReadResult {
     /**
      * 正式测量执行的总次数.
      */
-    private int total;
+    private long total;
 
     /**
      * 正式测量执行成功的次数.
      */
-    private int success;
+    private long success;
 
     /**
      * 正式测量执行失败的次数.
      */
-    private int failure;
+    private long failure;
+
+    /**
+     * 吞吐率，指单位时间内（每秒）的执行总次数.
+     *
+     * @since v1.1.1
+     */
+    private String throughput;
 
     /**
      * 正式执行的所有结果的总耗时.

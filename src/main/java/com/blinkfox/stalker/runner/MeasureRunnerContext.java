@@ -65,7 +65,7 @@ public final class MeasureRunnerContext {
      */
     public OverallResult run(Runnable runnable) {
         this.warmup(options, runnable);
-        return options.getThreads() > 1
+        return options.getThreads() > 1 && options.getConcurrens() > 1
                 ? new ConcurrentMeasureRunner().run(options, runnable)
                 : new SimpleMeasureRunner().run(options, runnable);
     }

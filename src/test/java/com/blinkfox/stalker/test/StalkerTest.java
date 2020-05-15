@@ -31,6 +31,14 @@ public class StalkerTest {
     }
 
     /**
+     * 测试简单无并发的执行情况.
+     */
+    @Test
+    public void runWithSimple() {
+        Stalker.run(Options.of(100, 1).runs(3), () -> new MyTestService().hello());
+    }
+
+    /**
      * 测试有options选项参数时的执行情况.
      */
     @Test

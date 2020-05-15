@@ -30,7 +30,7 @@ public class OutputConsole implements MeasureOutput {
     /**
      * 表头数据的数组.
      */
-    private static final List<String> HEADERS = Arrays.asList("", "Costs", "Total", "Success", "Failure",
+    private static final List<String> HEADERS = Arrays.asList("", "Costs", "Total", "Success", "Failure", "Throughput",
             "Sum", "Avg", "Min", "Max", "StdDev", "95% LowerConfidence", "95% UpperConfidence");
 
     /**
@@ -70,7 +70,7 @@ public class OutputConsole implements MeasureOutput {
             EasyReadResult result = measurements[i].getEasyReadResult();
             table.addDatas(i + 1,
                     result.getCosts(), result.getTotal(), result.getSuccess(), result.getFailure(),
-                    result.getSum(), result.getAvg(), result.getMin(), result.getMax(),
+                    result.getThroughput(), result.getSum(), result.getAvg(), result.getMin(), result.getMax(),
                     result.getStdDev(), result.getLowerConfidence(), result.getUpperConfidence());
         }
 
