@@ -8,7 +8,7 @@
 
 ## Features
 
-- Lightweight (jar package is only '27kb')
+- Lightweight (jar package is only '28kb')
 - API are simple and easy to use. 
 - Easy integration or expansion
 
@@ -18,7 +18,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -89,13 +89,13 @@ public static void main(String[] args) {
 The above results will default to the console output:
 
 ```bash
-+-----------------------------------------------------------------------------------------------------------------------------------------+
-|                                  threads: 1, concurrens: 1, warmups:5, runs: 10, printErrorLog: false                                   |
-+---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
-|   |  Costs   | Total | Success | Failure |   Sum    |   Avg   |   Min   |   Max   | StdDev  | 95% LowerConfidence | 95% UpperConfidence |
-+---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
-| 1 | 35.33 ms |  10   |   10    |    0    | 35.29 ms | 3.53 ms | 2.56 ms | 4.81 ms | 0.85 ms |       3.0 ms        |       4.06 ms       |
-+---+----------+-------+---------+---------+----------+---------+---------+---------+---------+---------------------+---------------------+
++------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                         threads: 1, concurrens: 1, warmups:5, runs: 10, printErrorLog: false                                         |
++---+----------+-------+---------+---------+------------+----------+---------+---------+---------+---------+---------------------+---------------------+
+|   |  Costs   | Total | Success | Failure | Throughput |   Sum    |   Avg   |   Min   |   Max   | StdDev  | 95% LowerConfidence | 95% UpperConfidence |
++---+----------+-------+---------+---------+------------+----------+---------+---------+---------+---------+---------------------+---------------------+
+| 1 | 40.52 ms |  10   |   10    |    0    |   246.76   | 40.43 ms | 4.04 ms | 2.24 ms | 7.74 ms | 1.56 ms |       3.07 ms       |       5.01 ms       |
++---+----------+-------+---------+---------+------------+----------+---------+---------+---------+---------+---------------------+---------------------+
 ```
 
 You can also get statistical results:
@@ -112,10 +112,10 @@ List<Object> measurements = mStalker.run(() -> new MyTestService().hello());
 
 #### 2. More complete example
 
-The following code indicates that the two methods `hello()` and `fastHello()` will preheat `1000` times, in the `1000` threads `200` concurrent, each time executing `10` times:
+The following code indicates that the two methods `hello()` and `fastHello()` will preheat `10` times, in the `1000` threads `200` concurrent, each time executing `5` times:
 
 ```java
-Stalker.run(Options.of(1000, 200).warmups(1000).runs(10),
+Stalker.run(Options.of(1000, 200).warmups(10).runs(5),
         () -> new MyTestService().hello(),
         () -> new MyTestService().fastHello());
 ```
@@ -123,14 +123,14 @@ Stalker.run(Options.of(1000, 200).warmups(1000).runs(10),
 The above results will default to the console output:
 
 ```bash
-+------------------------------------------------------------------------------------------------------------------------------------------+
-|                               threads: 1000, concurrens: 200, warmups:1000, runs: 10, printErrorLog: false                               |
-+---+-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
-|   |   Costs   | Total | Success | Failure |   Sum   |   Avg   |   Min   |   Max    | StdDev  | 95% LowerConfidence | 95% UpperConfidence |
-+---+-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
-| 1 | 454.33 ms | 10000 |  9900   |   100   | 36.79 s | 3.72 ms | 2.01 ms | 11.89 ms | 1.31 ms |       3.69 ms       |       3.74 ms       |
-| 2 | 159.94 ms | 10000 |  10000  |    0    | 21.72 s | 2.17 ms | 2.01 ms | 3.24 ms  | 0.15 ms |       2.17 ms       |       2.18 ms       |
-+---+-----------+-------+---------+---------+---------+---------+---------+----------+---------+---------------------+---------------------+
++-------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                       threads: 1000, concurrens: 200, warmups:10, runs: 5, printErrorLog: false                                       |
++---+-----------+-------+---------+---------+------------+---------+---------+---------+----------+---------+---------------------+---------------------+
+|   |   Costs   | Total | Success | Failure | Throughput |   Sum   |   Avg   |   Min   |   Max    | StdDev  | 95% LowerConfidence | 95% UpperConfidence |
++---+-----------+-------+---------+---------+------------+---------+---------+---------+----------+---------+---------------------+---------------------+
+| 1 | 668.93 ms | 5000  |  4955   |   45    |  7474.57   | 17.22 s | 3.48 ms | 2.01 ms | 11.66 ms | 1.14 ms |       3.44 ms       |       3.51 ms       |
+| 2 | 348.85 ms | 5000  |  5000   |    0    |  14332.69  | 11.23 s | 2.25 ms | 2.01 ms | 3.32 ms  | 0.19 ms |       2.24 ms       |       2.25 ms       |
++---+-----------+-------+---------+---------+------------+---------+---------+---------+----------+---------+---------------------+---------------------+
 ```
 
 Explanation of results:
@@ -139,6 +139,7 @@ Explanation of results:
 - `Total`: total number of official runs
 - `Success`: number of successful runs
 - `Failure`: number of failed runs
+- `Throughput`: Throughput of official runs
 - `Sum`: the value after each time-consuming summation of the run
 - `Avg`: arithmetic mean of all running time-consuming results
 - `Min`: the minimum of all running time-consuming results
@@ -206,7 +207,9 @@ This [stalker](https://github.com/blinkfox/stalker) library is open sourced unde
 
 ## Changelog
 
--v1.1.0 fixes the limitation when creating too many threads (2020-05-14)
+- v1.1.1 New statistical index of throughput (2020-05-20)
+  - New statistical index of throughput；
+- v1.1.0 fixes the limitation when creating too many threads (2020-05-14)
   - Added the ability to output results in `MeasureOutput`, and the default run method will also return its results;
   - Added `runStatis` method, you can get the original statistical result data;
 - v1.0.1 Fix the limitation problem when too many threads created (2019-09-14)
