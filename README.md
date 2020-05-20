@@ -209,7 +209,7 @@ This [stalker](https://github.com/blinkfox/stalker) library is open sourced unde
 
 - v1.1.1 New statistical index of throughput (2020-05-20)
   - New statistical index of throughput；
-- v1.1.0 fixes the limitation when creating too many threads (2020-05-14)
+- v1.1.0 Added the function of getting return results after running (2020-05-14)
   - Added the ability to output results in `MeasureOutput`, and the default run method will also return its results;
   - Added `runStatis` method, you can get the original statistical result data;
 - v1.0.1 Fix the limitation problem when too many threads created (2019-09-14)
