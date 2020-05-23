@@ -2,7 +2,6 @@ package com.blinkfox.stalker;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.MeasureOutputContext;
-import com.blinkfox.stalker.result.MeasurementCollector;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
 import java.util.List;
@@ -16,6 +15,34 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class Stalker {
+
+    /**
+     * 使用默认选项参数来提交可运行的测量任务，并立即返回此次会话的 ID.
+     *
+     * @param task 任务
+     * @return 会话 ID
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public String submit(Runnable task) {
+        return submit(Options.of(), task);
+    }
+
+    /**
+     * 提交可运行的测量任务，并立即返回此次会话的 ID.
+     *
+     * @param task 任务
+     * @return 会话 ID
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public String submit(Options options, Runnable task) {
+        if (options == null || task == null) {
+            throw new IllegalArgumentException("options or runnables is null (or empty)!");
+        }
+        options.valid();
+        return MeasureRunnerContext.submit(options, task);
+    }
 
     /**
      * 测量要执行的代码的性能评估.
@@ -56,7 +83,7 @@ public class Stalker {
         // 循环遍历测量各个 Runnable 实例的性能结果，然后将各个结果存放到数组中，最后统一输出出来.
         Measurement[] measurements = new Measurement[len];
         for (int i = 0; i < len; i++) {
-            measurements[i] = new MeasurementCollector().collect(new MeasureRunnerContext(options).run(runnables[i]));
+            measurements[i] = new MeasureRunnerContext(options).runAndCollect(runnables[i]);
         }
         return measurements;
     }

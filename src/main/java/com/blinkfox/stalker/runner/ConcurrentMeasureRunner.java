@@ -9,7 +9,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,22 +28,33 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
     /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
      */
+    @Getter
     private final Queue<Long> eachMeasures;
 
     /**
      * 测量过程中执行的总次数.
      */
+    @Getter
     private final AtomicLong total;
 
     /**
      * 测量过程中执行成功的次数.
      */
+    @Getter
     private final AtomicLong success;
 
     /**
      * 测量过程中执行失败的次数.
      */
+    @Getter
     private final AtomicLong failure;
+
+    /**
+     * 是否已经运行完成.
+     *
+     * @since v1.2.0
+     */
+    private final AtomicBoolean complete;
 
     /**
      * 构造方法.
@@ -53,6 +66,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
         this.total = new AtomicLong(0);
         this.success = new AtomicLong(0);
         this.failure = new AtomicLong(0);
+        this.complete = new AtomicBoolean(false);
     }
 
     /**
@@ -93,6 +107,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
         this.awaitAndShutdown(countDownLatch, executorService);
+        this.complete.compareAndSet(false, true);
         return this.buildMeasurement(System.nanoTime() - start);
     }
 
@@ -105,7 +120,6 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      */
     private void loopMeasure(int runs, boolean printErrorLog, final Runnable runnable) {
         for (int j = 0; j < runs; j++) {
-            this.total.incrementAndGet();
             try {
                 long eachStart = System.nanoTime();
                 runnable.run();
@@ -118,6 +132,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                 }
             }
+            this.total.incrementAndGet();
         }
     }
 
