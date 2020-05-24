@@ -6,7 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import lombok.Getter;
 
 /**
@@ -28,17 +28,17 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     /**
      * 测量过程中执行的总次数.
      */
-    protected AtomicLong total;
+    protected LongAdder total;
 
     /**
      * 测量过程中执行成功的次数.
      */
-    protected AtomicLong success;
+    protected LongAdder success;
 
     /**
      * 测量过程中执行失败的次数.
      */
-    protected AtomicLong failure;
+    protected LongAdder failure;
 
     /**
      * 是否已经运行完成.
@@ -62,9 +62,9 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      */
     public AbstractMeasureRunner() {
         this.eachMeasures = new ConcurrentLinkedQueue<>();
-        this.total = new AtomicLong(0);
-        this.success = new AtomicLong(0);
-        this.failure = new AtomicLong(0);
+        this.total = new LongAdder();
+        this.success = new LongAdder();
+        this.failure = new LongAdder();
         this.complete = new AtomicBoolean(false);
     }
 
@@ -85,17 +85,17 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
 
     @Override
     public long getTotal() {
-        return this.total.get();
+        return this.total.longValue();
     }
 
     @Override
     public long getSuccess() {
-        return this.success.get();
+        return this.success.longValue();
     }
 
     @Override
     public long getFailure() {
-        return this.failure.get();
+        return this.failure.longValue();
     }
 
     @Override
@@ -126,7 +126,7 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         long failure = this.getFailure();
         long[] eachCosts = this.getEachMeasures();
         long totalCount = eachCosts.length;
-        long costs = System.nanoTime() - this.startNanoTime;
+        long costs = this.startNanoTime == 0 ? 0 : System.nanoTime() - this.startNanoTime;
         return new OverallResult()
                 .setEachMeasures(eachCosts)
                 .setCosts(costs)

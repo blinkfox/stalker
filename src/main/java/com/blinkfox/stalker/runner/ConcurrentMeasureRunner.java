@@ -84,15 +84,15 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                 long eachStart = System.nanoTime();
                 runnable.run();
                 super.eachMeasures.add(System.nanoTime() - eachStart);
-                super.success.incrementAndGet();
+                super.success.increment();
             } catch (Exception e) {
                 // 如果待测量的方法，执行错误则失败数 +1,且根据选项参数来判断是否打印异常错误日志.
-                super.failure.incrementAndGet();
+                super.failure.increment();
                 if (printErrorLog) {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                 }
             }
-            super.total.incrementAndGet();
+            super.total.increment();
         }
     }
 

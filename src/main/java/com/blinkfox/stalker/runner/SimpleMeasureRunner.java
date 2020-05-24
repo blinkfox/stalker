@@ -40,14 +40,14 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
                 long eachStart = System.nanoTime();
                 runnable.run();
                 super.eachMeasures.add(System.nanoTime() - eachStart);
-                super.success.incrementAndGet();
+                super.success.increment();
             } catch (RuntimeException e) {
-                super.failure.incrementAndGet();
+                super.failure.increment();
                 if (printErrorLog) {
                     log.error("【stalker 错误】测量方法耗时信息出错!", e);
                 }
             }
-            super.total.incrementAndGet();
+            super.total.increment();
         }
 
         super.endNanoTime = System.nanoTime();

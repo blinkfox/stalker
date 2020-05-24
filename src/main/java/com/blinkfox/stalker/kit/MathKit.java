@@ -21,7 +21,7 @@ public class MathKit {
      * @return 吞吐率
      */
     public double calcThroughput(long count, long costs) {
-        return count / ((double) costs / 1e9);
+        return costs == 0 ? 0.0d : count / ((double) costs / 1e9);
     }
 
 }
