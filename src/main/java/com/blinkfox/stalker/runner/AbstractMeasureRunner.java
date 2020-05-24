@@ -5,9 +5,12 @@ import com.blinkfox.stalker.result.bean.OverallResult;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 用于测量待执行方法耗时情况等信息的抽象运行器，实现了 {@link MeasureRunner} 接口.
@@ -18,7 +21,18 @@ import lombok.Getter;
  * @see ConcurrentMeasureRunner
  * @since v1.2.0
  */
+@Slf4j
 public abstract class AbstractMeasureRunner implements MeasureRunner {
+
+    /**
+     * 线程池.
+     */
+    protected ExecutorService executorService;
+
+    /**
+     * 线程执行计数器锁.
+     */
+    protected CountDownLatch countLatch;
 
     /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒({@code ns}).
@@ -151,6 +165,24 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
                 .setSuccess(this.getSuccess())
                 .setFailure(this.getFailure())
                 .setThroughput(MathKit.calcThroughput(totalCount, this.getCosts()));
+    }
+
+    /**
+     * 等待所有线程执行完毕，并最终关闭线程池.
+     */
+    protected void awaitAndShutdown() {
+        try {
+            if (this.countLatch != null) {
+                this.countLatch.await();
+            }
+        } catch (InterruptedException e) {
+            log.error("在多线程下等待测量结果结束时出错!", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            if (this.executorService != null) {
+                this.executorService.shutdown();
+            }
+        }
     }
 
 }

@@ -3,7 +3,6 @@ package com.blinkfox.stalker.runner;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +43,8 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
         Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
-        CountDownLatch countDownLatch = new CountDownLatch(threads);
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
+        super.countLatch = new CountDownLatch(threads);
+        super.executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
         super.startNanoTime = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
@@ -59,13 +58,13 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                     Thread.currentThread().interrupt();
                 } finally {
-                    countDownLatch.countDown();
+                    super.countLatch.countDown();
                 }
             });
         }
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        this.awaitAndShutdown(countDownLatch, executorService);
+        this.awaitAndShutdown();
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
         return super.buildFinalMeasurement();
@@ -93,23 +92,6 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                 }
             }
             super.total.increment();
-        }
-    }
-
-    /**
-     * 等待所有线程执行完毕，并最终关闭线程池.
-     *
-     * @param countDownLatch countDownLatch实例
-     * @param executorService 线程池
-     */
-    private void awaitAndShutdown(CountDownLatch countDownLatch, ExecutorService executorService) {
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            log.error("在多线程下等待测量结果结束时出错!", e);
-            Thread.currentThread().interrupt();
-        } finally {
-            executorService.shutdown();
         }
     }
 

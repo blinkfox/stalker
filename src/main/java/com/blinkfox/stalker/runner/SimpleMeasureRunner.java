@@ -2,6 +2,8 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,24 +34,32 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
     public OverallResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
+        super.countLatch = new CountDownLatch(1);
+        super.executorService = Executors.newSingleThreadExecutor();
         super.startNanoTime = System.nanoTime();
 
-        // 单线程循环执行 runs 次.
-        for (int i = 0; i < totalCount; ++i) {
-            try {
-                long eachStart = System.nanoTime();
-                runnable.run();
-                super.eachMeasures.add(System.nanoTime() - eachStart);
-                super.success.increment();
-            } catch (RuntimeException e) {
-                super.failure.increment();
-                if (printErrorLog) {
-                    log.error("【stalker 错误】测量方法耗时信息出错!", e);
+        // 由于并发数是 1，直接单线程循环执行 (runs * threads) 次即可.
+        executorService.submit(() -> {
+            for (int i = 0; i < totalCount; ++i) {
+                try {
+                    long eachStart = System.nanoTime();
+                    runnable.run();
+                    super.eachMeasures.add(System.nanoTime() - eachStart);
+                    super.success.increment();
+                } catch (Exception e) {
+                    super.failure.increment();
+                    if (printErrorLog) {
+                        log.error("【stalker 错误】测量方法耗时信息出错!", e);
+                    }
+                } finally {
+                    super.total.increment();
                 }
             }
-            super.total.increment();
-        }
+            super.countLatch.countDown();
+        });
 
+        // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
+        this.awaitAndShutdown();
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
         return super.buildFinalMeasurement();
