@@ -64,7 +64,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         }
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        this.awaitAndShutdown();
+        super.awaitAndShutdown();
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
         return super.buildFinalMeasurement();

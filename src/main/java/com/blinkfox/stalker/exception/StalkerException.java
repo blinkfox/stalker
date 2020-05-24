@@ -19,4 +19,14 @@ public class StalkerException extends RuntimeException {
         super(s);
     }
 
+    /**
+     * 附带异常实例的构造方法.
+     *
+     * @param s 异常描述信息
+     * @param e 异常实例
+     */
+    public StalkerException(String s, Throwable e) {
+        super(s, e);
+    }
+
 }
