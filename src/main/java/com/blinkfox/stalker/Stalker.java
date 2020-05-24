@@ -54,8 +54,31 @@ public class Stalker {
      * @author blinkfox on 2020-05-23
      * @since v1.2.0
      */
-    public Object query(String sessionId) {
+    public List<Object> query(String sessionId) {
         return MeasureRunnerContext.query(sessionId);
+    }
+
+    /**
+     * 根据运行的测量会话 ID，判断任务是否在运行中，即时该任务也许不存在，查找不到时，也会认为是 {@code true}.
+     *
+     * @param sessionId 会话 ID
+     * @return 布尔值
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
+     */
+    public boolean isRunning(String sessionId) {
+        return MeasureRunnerContext.isRunning(sessionId);
+    }
+
+    /**
+     * 根据运行的测量会话 ID，移除相关的运行任务记录.目前不会停止任务，只是从缓存中移除任务记录.
+     *
+     * @param sessionId 会话 ID
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public void remove(String sessionId) {
+        MeasureRunnerContext.remove(sessionId);
     }
 
     /**

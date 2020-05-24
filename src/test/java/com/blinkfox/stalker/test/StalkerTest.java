@@ -3,6 +3,8 @@ package com.blinkfox.stalker.test;
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.test.prepare.MyTestService;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,6 +14,7 @@ import org.junit.Test;
  * @author blinkfox on 2019-02-03.
  * @since v1.0.0
  */
+@Slf4j
 public class StalkerTest {
 
     /**
@@ -92,4 +95,60 @@ public class StalkerTest {
                 () -> new MyTestService().helloException());
     }
 
+    /**
+     * 测试没有Options选项参数时的执行情况.
+     */
+    @Test
+    public void submit() throws InterruptedException {
+        String sessionId = Stalker.submit(() -> new MyTestService().hello());
+        Assert.assertNotNull(sessionId);
+
+        while (Stalker.isRunning(sessionId)) {
+            List<Object> results = Stalker.query(sessionId);
+            Assert.assertNotNull(results.get(0));
+            Thread.sleep(1L);
+        }
+
+        log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
+        Stalker.query(sessionId);
+        // 执行完成之后移除 sessionId.
+        Stalker.remove(sessionId);
+    }
+
+    /**
+     * 测试慢方法的执行情况.
+     */
+    @Test
+    public void submitWithSlowMethod() throws InterruptedException {
+        String sessionId = Stalker.submit(Options.of("SlowTest", 20, 5, 1), () -> new MyTestService().slowHello());
+        Assert.assertNotNull(sessionId);
+
+        while (Stalker.isRunning(sessionId)) {
+            List<Object> results = Stalker.query(sessionId);
+            Assert.assertNotNull(results.get(0));
+            Thread.sleep(50L);
+        }
+
+        log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
+        Stalker.query(sessionId);
+
+        // 执行完成之后移除 sessionId.
+        Stalker.remove(sessionId);
+    }
+
+    /**
+     * 测试 queryMeasurement 方法.
+     */
+    @Test
+    public void queryMeasurement() throws InterruptedException {
+        String sessionId = Stalker.submit(() -> new MyTestService().hello());
+        Assert.assertNotNull(sessionId);
+
+        while (Stalker.isRunning(sessionId)) {
+            Stalker.queryMeasurement(sessionId);
+            Thread.sleep(5L);
+        }
+        // 执行完成之后移除 sessionId.
+        Stalker.remove(sessionId);
+    }
 }

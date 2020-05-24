@@ -1,5 +1,6 @@
-package com.blinkfox.stalker.kit;
+package com.blinkfox.stalker.test.kit;
 
+import com.blinkfox.stalker.kit.MathKit;
 import org.junit.Assert;
 import org.junit.Test;
 

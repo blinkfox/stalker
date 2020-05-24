@@ -168,4 +168,28 @@ public final class MeasureRunnerContext {
                 new MeasurementCollector().collect(runnerInfo.getMeasureRunner().buildRunningMeasurement()));
     }
 
+    /**
+     * 根据运行的测量会话 ID，移除相关的运行任务记录.目前不会停止任务，只是从缓存中移除任务记录.
+     *
+     * @param sessionId 会话 ID
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
+     */
+    public static void remove(String sessionId) {
+        measureMap.remove(sessionId);
+    }
+
+    /**
+     * 根据运行的测量会话 ID，判断任务是否在运行中，即时该任务也许不存在，查找不到时，也会认为是 {@code true}.
+     *
+     * @param sessionId 会话 ID
+     * @return 布尔值
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
+     */
+    public static boolean isRunning(String sessionId) {
+        RunnerInfo runnerInfo = measureMap.get(sessionId);
+        return runnerInfo != null && !runnerInfo.getMeasureRunner().isComplete();
+    }
+
 }

@@ -126,7 +126,7 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         long failure = this.getFailure();
         long[] eachCosts = this.getEachMeasures();
         long totalCount = eachCosts.length;
-        long costs = System.currentTimeMillis() - this.startNanoTime;
+        long costs = System.nanoTime() - this.startNanoTime;
         return new OverallResult()
                 .setEachMeasures(eachCosts)
                 .setCosts(costs)
