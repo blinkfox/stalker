@@ -93,6 +93,13 @@ public interface MeasureRunner {
     long getCosts();
 
     /**
+     * 停止相关的运行测量任务.
+     *
+     * @return 是否成功的布尔值
+     */
+    boolean stop();
+
+    /**
      * 构建运行中的任务的总体测量结果信息.
      *
      * @return 总体测量结果信息

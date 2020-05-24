@@ -95,4 +95,16 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         }
     }
 
+    /**
+     * 停止相关的运行测量任务.
+     *
+     * @return 是否成功的布尔值
+     * @author blinkfox on 2020-05-25.
+     * @since v1.2.0
+     */
+    public boolean stop() {
+        // TODO
+        return false;
+    }
+
 }
