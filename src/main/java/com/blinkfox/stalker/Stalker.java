@@ -31,6 +31,7 @@ public class Stalker {
     /**
      * 提交可运行的测量任务，并立即返回此次会话的 ID.
      *
+     * @param options 选项参数
      * @param task 任务
      * @return 会话 ID
      * @author blinkfox on 2020-05-23
@@ -42,6 +43,31 @@ public class Stalker {
         }
         options.valid();
         return MeasureRunnerContext.submit(options, task);
+    }
+
+    /**
+     * 根据会话的 ID 查询其对应的运行任务的测量结果数据，本结果是在 {@link Options#getOutputs()} 的属性中
+     * {@link com.blinkfox.stalker.output.MeasureOutput} 接口定义的输出结果.
+     *
+     * @param sessionId 会话 ID
+     * @return 运行的最终输出结果
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public Object query(String sessionId) {
+        return MeasureRunnerContext.query(sessionId);
+    }
+
+    /**
+     * 根据会话的 ID 查询其对应的运行任务的测量结果数据.
+     *
+     * @param sessionId 会话 ID
+     * @return 运行的测量结果
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public Measurement queryMeasurement(String sessionId) {
+        return MeasureRunnerContext.queryMeasurement(sessionId);
     }
 
     /**

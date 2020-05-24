@@ -1,17 +1,11 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.kit.MathKit;
 import com.blinkfox.stalker.result.bean.OverallResult;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,40 +15,9 @@ import lombok.extern.slf4j.Slf4j;
  * @since v1.0.0
  */
 @Slf4j
-public class ConcurrentMeasureRunner implements MeasureRunner {
+public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
     private static final int N_1024 = 1024;
-
-    /**
-     * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
-     */
-    @Getter
-    private final Queue<Long> eachMeasures;
-
-    /**
-     * 测量过程中执行的总次数.
-     */
-    @Getter
-    private final AtomicLong total;
-
-    /**
-     * 测量过程中执行成功的次数.
-     */
-    @Getter
-    private final AtomicLong success;
-
-    /**
-     * 测量过程中执行失败的次数.
-     */
-    @Getter
-    private final AtomicLong failure;
-
-    /**
-     * 是否已经运行完成.
-     *
-     * @since v1.2.0
-     */
-    private final AtomicBoolean complete;
 
     /**
      * 构造方法.
@@ -62,11 +25,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      * <p>这个类中的属性，需要支持高并发写入.</p>
      */
     public ConcurrentMeasureRunner() {
-        this.eachMeasures = new ConcurrentLinkedQueue<>();
-        this.total = new AtomicLong(0);
-        this.success = new AtomicLong(0);
-        this.failure = new AtomicLong(0);
-        this.complete = new AtomicBoolean(false);
+        super();
     }
 
     /**
@@ -87,7 +46,7 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
         Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
         CountDownLatch countDownLatch = new CountDownLatch(threads);
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
-        final long start = System.nanoTime();
+        super.startNanoTime = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
         for (int i = 0; i < threads; i++) {
@@ -107,8 +66,9 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
         this.awaitAndShutdown(countDownLatch, executorService);
-        this.complete.compareAndSet(false, true);
-        return this.buildMeasurement(System.nanoTime() - start);
+        super.endNanoTime = System.nanoTime();
+        super.complete.compareAndSet(false, true);
+        return super.buildFinalMeasurement();
     }
 
     /**
@@ -123,16 +83,16 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
             try {
                 long eachStart = System.nanoTime();
                 runnable.run();
-                this.eachMeasures.add(System.nanoTime() - eachStart);
-                this.success.incrementAndGet();
+                super.eachMeasures.add(System.nanoTime() - eachStart);
+                super.success.incrementAndGet();
             } catch (Exception e) {
                 // 如果待测量的方法，执行错误则失败数 +1,且根据选项参数来判断是否打印异常错误日志.
-                this.failure.incrementAndGet();
+                super.failure.incrementAndGet();
                 if (printErrorLog) {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                 }
             }
-            this.total.incrementAndGet();
+            super.total.incrementAndGet();
         }
     }
 
@@ -151,30 +111,6 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
         } finally {
             executorService.shutdown();
         }
-    }
-
-    /**
-     * 构造测量的结果信息的 Measurement 对象.
-     *
-     * @param costs 消耗的总耗时，单位是纳秒
-     * @return Measurement对象
-     */
-    private OverallResult buildMeasurement(long costs) {
-        // 将队列转数组.
-        int len = this.eachMeasures.size();
-        long[] measures = new long[len];
-        for (int i = 0; i < len; i++) {
-            measures[i] = eachMeasures.remove();
-        }
-
-        long totalCount = this.total.get();
-        return new OverallResult()
-                .setEachMeasures(measures)
-                .setCosts(costs)
-                .setTotal(totalCount)
-                .setSuccess(this.success.get())
-                .setFailure(this.failure.get())
-                .setThroughput(MathKit.calcThroughput(totalCount, costs));
     }
 
 }

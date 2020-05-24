@@ -2,10 +2,14 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.IdWorker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.exception.StalkerException;
 import com.blinkfox.stalker.kit.StrKit;
+import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.result.MeasurementCollector;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.bean.RunnerInfo;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,9 +33,9 @@ public final class MeasureRunnerContext {
             3, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(5));
 
     /**
-     * 用来存储 {@link MeasureRunner} 的容器，Key 是运行时的 sessionId, value 是 {@link MeasureRunner} 的实例.
+     * 用来存储 {@link MeasureRunner} 的容器，Key 是运行时的 sessionId, value 是 {@link RunnerInfo} 的实例.
      */
-    private static final Map<String, MeasureRunner> measureMap = new ConcurrentHashMap<>();
+    private static final Map<String, RunnerInfo> measureMap = new ConcurrentHashMap<>();
 
     /**
      * 使用雪花算法生成短 ID 的生成器.
@@ -124,7 +128,7 @@ public final class MeasureRunnerContext {
                 ? new ConcurrentMeasureRunner()
                 : new SimpleMeasureRunner();
         String sessionId = idWorker.get62RadixId();
-        measureMap.put(sessionId, measureRunner);
+        measureMap.put(sessionId, new RunnerInfo(options, measureRunner));
         executor.execute(() -> measureRunner.run(options, runnable));
         return sessionId;
     }
@@ -137,8 +141,31 @@ public final class MeasureRunnerContext {
      * @author blinkfox on 2020-05-23.
      * @since v1.2.0
      */
-    public static Measurement submit(String sessionId) {
-        return null;
+    public static Measurement queryMeasurement(String sessionId) {
+        RunnerInfo runnerInfo = measureMap.get(sessionId);
+        if (runnerInfo == null) {
+            throw new StalkerException(StrKit.format("根据当前 sessionId【{}】无法找到对应的运行任务，"
+                    + "或者该任务已过期，请重新开始执行。", sessionId));
+        }
+        return new MeasurementCollector().collect(runnerInfo.getMeasureRunner().buildRunningMeasurement());
+    }
+
+    /**
+     * 根据运行的测量会话 ID，来查询该会话所对应的测量结果.
+     *
+     * @param sessionId 会话 ID
+     * @return 最终的输出结果
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
+     */
+    public static List<Object> query(String sessionId) {
+        RunnerInfo runnerInfo = measureMap.get(sessionId);
+        if (runnerInfo == null) {
+            throw new StalkerException(StrKit.format("根据当前 sessionId【{}】无法找到对应的运行任务，"
+                    + "或者该任务已过期，请重新开始执行。", sessionId));
+        }
+        return new MeasureOutputContext().output(runnerInfo.getOptions(),
+                new MeasurementCollector().collect(runnerInfo.getMeasureRunner().buildRunningMeasurement()));
     }
 
 }

@@ -3,6 +3,7 @@ package com.blinkfox.stalker.kit;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.experimental.UtilityClass;
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  * 字符串操作工具类.
@@ -28,6 +29,8 @@ public class StrKit {
      *
      * @param objects 不定参数对象
      * @return 字符串
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
      */
     public String join(Object... objects) {
         if (objects != null && objects.length > 0) {
@@ -37,8 +40,18 @@ public class StrKit {
             }
             return sb.toString();
         }
-
         return "";
+    }
+
+    /**
+     * 使用 Slf4j 中的字符串格式化方式来格式化字符串.
+     *
+     * @param pattern 待格式化的字符串
+     * @param args 参数
+     * @return 格式化后的字符串
+     */
+    public static String format(String pattern, Object... args) {
+        return pattern == null ? "" : MessageFormatter.arrayFormat(pattern, args).getMessage();
     }
 
     /**
