@@ -98,6 +98,15 @@ public class StalkerTest {
     }
 
     /**
+     * 测试慢方法的执行情况.
+     */
+    @Test
+    public void runWithSlowMethod() {
+        Stalker.run(Options.of("SlowTest", 20, 5, 1),
+                () -> new MyTestService().slowHello());
+    }
+
+    /**
      * 测试没有Options选项参数时的执行情况.
      */
     @Test
