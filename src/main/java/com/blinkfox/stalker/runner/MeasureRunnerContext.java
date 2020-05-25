@@ -197,7 +197,6 @@ public final class MeasureRunnerContext {
      * 根据运行的测量会话 ID，停止相关的测量任务.
      *
      * @param sessionId 会话 ID
-     * @return 布尔值
      * @author blinkfox on 2020-05-26.
      * @since v1.2.0
      */
