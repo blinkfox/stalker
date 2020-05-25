@@ -40,11 +40,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     protected Queue<Long> eachMeasures;
 
     /**
-     * 测量过程中执行的总次数.
-     */
-    protected LongAdder total;
-
-    /**
      * 测量过程中执行成功的次数.
      */
     protected LongAdder success;
@@ -76,7 +71,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      */
     public AbstractMeasureRunner() {
         this.eachMeasures = new ConcurrentLinkedQueue<>();
-        this.total = new LongAdder();
         this.success = new LongAdder();
         this.failure = new LongAdder();
         this.complete = new AtomicBoolean(false);
@@ -99,7 +93,7 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
 
     @Override
     public long getTotal() {
-        return this.total.longValue();
+        return this.success.longValue() + this.failure.longValue();
     }
 
     @Override
@@ -157,13 +151,15 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      */
     @Override
     public OverallResult buildFinalMeasurement() {
-        long totalCount = this.getTotal();
+        long successCount = this.success.longValue();
+        long failureCount = this.failure.longValue();
+        long totalCount = successCount + failureCount;
         return new OverallResult()
                 .setEachMeasures(this.getEachMeasures())
                 .setCosts(this.getCosts())
                 .setTotal(totalCount)
-                .setSuccess(this.getSuccess())
-                .setFailure(this.getFailure())
+                .setSuccess(successCount)
+                .setFailure(failureCount)
                 .setThroughput(MathKit.calcThroughput(totalCount, this.getCosts()));
     }
 

@@ -59,8 +59,6 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
                     if (printErrorLog) {
                         log.error("【stalker 错误】测量方法耗时信息出错!", e);
                     }
-                } finally {
-                    super.total.increment();
                 }
             }
         });

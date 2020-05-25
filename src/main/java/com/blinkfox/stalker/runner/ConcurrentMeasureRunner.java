@@ -91,7 +91,6 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                 }
             }
-            super.total.increment();
         }
     }
 
