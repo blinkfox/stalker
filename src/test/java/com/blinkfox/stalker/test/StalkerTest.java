@@ -106,7 +106,7 @@ public class StalkerTest {
         while (Stalker.isRunning(sessionId)) {
             List<Object> results = Stalker.query(sessionId);
             Assert.assertNotNull(results.get(0));
-            Thread.sleep(1L);
+            Thread.sleep(3L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");

@@ -1,11 +1,9 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.exception.StalkerException;
 import com.blinkfox.stalker.result.bean.OverallResult;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,9 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SimpleMeasureRunner extends AbstractMeasureRunner {
 
     /**
-     * 测量任务的 {@link FutureTask} 实例.
+     * 执行中的测量任务的 {@link Future} 实例.
+     *
+     * @since v1.2.0
      */
-    private FutureTask<?> measureTask;
+    private Future<?> measureTask;
 
     /**
      * 构造方法.
@@ -41,47 +41,41 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
     public OverallResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
-        super.countLatch = new CountDownLatch(1);
         super.executorService = Executors.newSingleThreadExecutor();
         super.startNanoTime = System.nanoTime();
 
         // 由于并发数是 1，直接单线程循环执行 (runs * threads) 次即可，
-        // 将执行的相关任务以 FutureTask 的形式来执行，便于程序动态取消任务.
-        executorService.submit(() -> {
-            this.measureTask = new FutureTask<>(() -> {
-                for (int i = 0; i < totalCount; ++i) {
-                    try {
-                        // 开始执行测量任务，记录开始时间、执行次数等.
-                        long eachStart = System.nanoTime();
-                        measureTask.get();
-                        super.eachMeasures.add(System.nanoTime() - eachStart);
-                        super.success.increment();
-                    } catch (Exception e) {
-                        super.failure.increment();
-                        if (printErrorLog) {
-                            log.error("【stalker 错误】测量方法耗时信息出错!", e);
-                        }
-                    } finally {
-                        super.total.increment();
+        // 将执行的相关任务以 Future 的形式来执行，便于程序动态取消任务或判断任务执行情况等.
+        this.measureTask = executorService.submit(() -> {
+            for (int i = 0; i < totalCount; ++i) {
+                try {
+                    // 开始执行测量任务，记录开始时间、执行次数等.
+                    long eachStart = System.nanoTime();
+                    runnable.run();
+                    super.eachMeasures.add(System.nanoTime() - eachStart);
+                    super.success.increment();
+                } catch (Exception e) {
+                    super.failure.increment();
+                    if (printErrorLog) {
+                        log.error("【stalker 错误】测量方法耗时信息出错!", e);
                     }
+                } finally {
+                    super.total.increment();
                 }
-            }, null);
-
-            // 阻塞调用执行测量任务.
-            try {
-                this.measureTask.get();
-            } catch (Exception e) {
-                throw new StalkerException("【Stalker 异常】执行测量任务发生异常！", e);
             }
-
-            super.countLatch.countDown();
-            measureTaskQueue.remove(null);
         });
 
+        // 阻塞调用要执行的测量任务，达到等待任务结束的目的.
+        try {
+            this.measureTask.get();
+        } catch (Exception e) {
+            log.error("【Stalker 错误】执行测量任务发生错误！", e);
+        }
+
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        super.awaitAndShutdown();
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
+        super.awaitAndShutdown();
         return super.buildFinalMeasurement();
     }
 

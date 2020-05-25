@@ -64,9 +64,9 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         }
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        super.awaitAndShutdown();
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
+        super.awaitAndShutdown();
         return super.buildFinalMeasurement();
     }
 
@@ -98,13 +98,18 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
     /**
      * 停止相关的运行测量任务.
      *
+     * <p>注意：如果任务未完成，则立即停止线程池，但是还不能停止正在运行中的若干任务线程，
+     * 暂时还没想到一个更好的、高性能的停止所有运行中的任务的方法.</p>
+     *
      * @return 是否成功的布尔值
      * @author blinkfox on 2020-05-25.
      * @since v1.2.0
      */
     public boolean stop() {
-        // TODO
-        return false;
+        if (!isComplete()) {
+            super.shutdownNowQuietly();
+        }
+        return true;
     }
 
 }

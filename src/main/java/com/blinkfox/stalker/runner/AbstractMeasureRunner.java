@@ -36,11 +36,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     protected CountDownLatch countLatch;
 
     /**
-     * 用于存储正在执行中的任务队列，记录下来便于全局控制任务的取消暂停等.
-     */
-    protected Queue<FutureTask<?>> measureTaskQueue;
-
-    /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒({@code ns}).
      */
     protected Queue<Long> eachMeasures;
@@ -86,7 +81,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      * 公共的抽象父构造方法.
      */
     public AbstractMeasureRunner() {
-        this.measureTaskQueue = new ConcurrentLinkedQueue<>();
         this.eachMeasures = new ConcurrentLinkedQueue<>();
         this.total = new LongAdder();
         this.success = new LongAdder();
