@@ -5,6 +5,7 @@ import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
 import java.util.List;
+import java.util.Set;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -82,6 +83,17 @@ public class Stalker {
     }
 
     /**
+     * 根据运行的测量会话 ID，停止相关的测量任务.
+     *
+     * @param sessionId 会话 ID
+     * @author blinkfox on 2020-05-23
+     * @since v1.2.0
+     */
+    public void stop(String sessionId) {
+        MeasureRunnerContext.stop(sessionId);
+    }
+
+    /**
      * 根据会话的 ID 查询其对应的运行任务的测量结果数据.
      *
      * @param sessionId 会话 ID
@@ -91,6 +103,27 @@ public class Stalker {
      */
     public Measurement queryMeasurement(String sessionId) {
         return MeasureRunnerContext.queryMeasurement(sessionId);
+    }
+
+    /**
+     * 清除所有测量任务记录.
+     *
+     * @author blinkfox on 2020-05-26.
+     * @since v1.2.0
+     */
+    public void clear() {
+        MeasureRunnerContext.clear();
+    }
+
+    /**
+     * 获取所有测量任务记录的 Session ID 集合.
+     *
+     * @return Session ID 集合
+     * @author blinkfox on 2020-05-26.
+     * @since v1.2.0
+     */
+    public Set<String> getAllSessions() {
+        return MeasureRunnerContext.getAllSessions();
     }
 
     /**

@@ -92,6 +92,9 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
             return true;
         }
 
+        super.endNanoTime = System.nanoTime();
+        super.complete.compareAndSet(false, true);
+
         // 立即关闭线程池.
         super.shutdownNowQuietly();
         // 取消正在执行中的任务.

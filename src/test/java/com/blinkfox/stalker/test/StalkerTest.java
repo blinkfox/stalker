@@ -2,9 +2,11 @@ package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -120,7 +122,8 @@ public class StalkerTest {
      */
     @Test
     public void submitWithSlowMethod() throws InterruptedException {
-        String sessionId = Stalker.submit(Options.of("SlowTest", 20, 5, 1), () -> new MyTestService().slowHello());
+        String sessionId = Stalker.submit(Options.of("SlowTest", 20, 5, 1),
+                () -> new MyTestService().slowHello());
         Assert.assertNotNull(sessionId);
 
         while (Stalker.isRunning(sessionId)) {
@@ -145,10 +148,45 @@ public class StalkerTest {
         Assert.assertNotNull(sessionId);
 
         while (Stalker.isRunning(sessionId)) {
-            Stalker.queryMeasurement(sessionId);
+            Measurement measurement = Stalker.queryMeasurement(sessionId);
+            Assert.assertNotNull(measurement);
             Thread.sleep(5L);
         }
         // 执行完成之后移除 sessionId.
         Stalker.remove(sessionId);
     }
+
+    /**
+     * 测试慢方法的执行情况.
+     */
+    @Test
+    public void submitWithStop() throws InterruptedException {
+        String sessionId = Stalker.submit(Options.of("StopTest", 20, 5, 1),
+                () -> new MyTestService().slowHello());
+        Assert.assertNotNull(sessionId);
+
+        Thread.sleep(50L);
+        List<Object> results = Stalker.query(sessionId);
+        Assert.assertNotNull(results.get(0));
+        Stalker.stop(sessionId);
+        log.info("任务已停止，获取停止前的执行结果.");
+        Stalker.query(sessionId);
+        Thread.sleep(100L);
+
+        log.info("任务已停止，获取最后的执行结果.");
+        Stalker.query(sessionId);
+
+        // 执行完成之后移除 sessionId.
+        Stalker.remove(sessionId);
+    }
+
+    /**
+     * 单测结束后执行的方法.
+     */
+    @AfterClass
+    public static void destroy() {
+        Assert.assertNotNull(Stalker.getAllSessions());
+        Stalker.clear();
+    }
+
 }

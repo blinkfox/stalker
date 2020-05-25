@@ -11,6 +11,7 @@ import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.result.bean.RunnerInfo;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -190,6 +191,42 @@ public final class MeasureRunnerContext {
     public static boolean isRunning(String sessionId) {
         RunnerInfo runnerInfo = measureMap.get(sessionId);
         return runnerInfo != null && !runnerInfo.getMeasureRunner().isComplete();
+    }
+
+    /**
+     * 根据运行的测量会话 ID，停止相关的测量任务.
+     *
+     * @param sessionId 会话 ID
+     * @return 布尔值
+     * @author blinkfox on 2020-05-26.
+     * @since v1.2.0
+     */
+    public static void stop(String sessionId) {
+        RunnerInfo runnerInfo = measureMap.get(sessionId);
+        if (runnerInfo != null) {
+            runnerInfo.getMeasureRunner().stop();
+        }
+    }
+
+    /**
+     * 清除所有测量任务记录.
+     *
+     * @author blinkfox on 2020-05-26.
+     * @since v1.2.0
+     */
+    public static void clear() {
+        measureMap.clear();
+    }
+
+    /**
+     * 获取所有测量任务记录的 Session ID 集合.
+     *
+     * @return Session ID 集合
+     * @author blinkfox on 2020-05-26.
+     * @since v1.2.0
+     */
+    public static Set<String> getAllSessions() {
+        return measureMap.keySet();
     }
 
 }

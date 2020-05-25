@@ -7,7 +7,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import lombok.Getter;
@@ -61,11 +60,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     protected AtomicBoolean complete;
 
     /**
-     * 是否发起了停止执行任务的信号，如果为 true，需要停止掉当前正在执行或未来待执行的所有任务，并关闭线程池.
-     */
-    protected AtomicBoolean stopSignal;
-
-    /**
      * 运行开始时的纳秒时间戳，单位为纳秒({@code ns}).
      */
     @Getter
@@ -86,7 +80,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         this.success = new LongAdder();
         this.failure = new LongAdder();
         this.complete = new AtomicBoolean(false);
-        this.stopSignal = new AtomicBoolean(false);
     }
 
     @Override

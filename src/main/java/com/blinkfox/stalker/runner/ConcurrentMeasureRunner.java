@@ -107,6 +107,8 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      */
     public boolean stop() {
         if (!isComplete()) {
+            super.endNanoTime = System.nanoTime();
+            super.complete.compareAndSet(false, true);
             super.shutdownNowQuietly();
         }
         return true;
