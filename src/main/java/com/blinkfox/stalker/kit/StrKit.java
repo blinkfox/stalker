@@ -103,6 +103,8 @@ public class StrKit {
      * 获取 {@code 62} 进制的长度为 19 位长度的 {@code UUID} 字符串.
      *
      * @return {@code 62} 进制位的 {@code UUID}
+     * @author blinkfox on 2020-05-27.
+     * @since v1.2.0
      */
     public String get62RadixUuid() {
         UUID uuid = UUID.randomUUID();

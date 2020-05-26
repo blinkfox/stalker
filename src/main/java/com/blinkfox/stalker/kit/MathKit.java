@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
  * 数学计算的相关工具类.
  *
  * @author blinkfox on 2020-05-15.
- * @since v1.0.0
+ * @since v1.1.1
  */
 @UtilityClass
 public class MathKit {
