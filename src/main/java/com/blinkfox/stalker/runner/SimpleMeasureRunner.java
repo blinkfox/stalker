@@ -73,7 +73,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
-        super.awaitAndShutdown();
+        super.shutdown();
         return super.buildFinalMeasurement();
     }
 

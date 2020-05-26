@@ -54,8 +54,7 @@ public class MyTestService {
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
-            log.info("InterruptedException", e);
-            Thread.currentThread().interrupt();
+            log.error("【Stalker 提示】本方法的执行已中断，异常简述为：【{}】.", e.getMessage());
         }
     }
 

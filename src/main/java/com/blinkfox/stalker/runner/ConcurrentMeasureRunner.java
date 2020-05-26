@@ -43,7 +43,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
         Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
-        super.countLatch = new CountDownLatch(threads);
+        CountDownLatch countLatch = new CountDownLatch(threads);
         super.executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
         super.startNanoTime = System.nanoTime();
 
@@ -55,18 +55,19 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                     this.loopMeasure(runs, printErrorLog, runnable);
                     semaphore.release();
                 } catch (InterruptedException e) {
-                    log.error("测量方法耗时信息在多线程下出错!", e);
+                    log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息出错!", e);
                     Thread.currentThread().interrupt();
                 } finally {
-                    super.countLatch.countDown();
+                    countLatch.countDown();
                 }
             });
         }
 
-        // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
+        // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池，最后将结果封装成实体信息返回.
+        this.await(countLatch);
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
-        super.awaitAndShutdown();
+        super.shutdown();
         return super.buildFinalMeasurement();
     }
 
@@ -111,6 +112,20 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
             super.shutdownNowQuietly();
         }
         return true;
+    }
+
+    /**
+     * 等待所有线程执行完毕，并最终关闭线程池.
+     */
+    private void await(CountDownLatch countLatch) {
+        try {
+            if (countLatch != null) {
+                countLatch.await();
+            }
+        } catch (InterruptedException e) {
+            log.error("【Stalker 错误提示】在并发执行下等待任务执行结束时出错!", e);
+            Thread.currentThread().interrupt();
+        }
     }
 
 }

@@ -5,7 +5,6 @@ import com.blinkfox.stalker.result.bean.OverallResult;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
@@ -28,11 +27,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      * 线程池.
      */
     protected ExecutorService executorService;
-
-    /**
-     * 线程执行计数器锁.
-     */
-    protected CountDownLatch countLatch;
 
     /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒({@code ns}).
@@ -166,18 +160,9 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     /**
      * 等待所有线程执行完毕，并最终关闭线程池.
      */
-    protected void awaitAndShutdown() {
-        try {
-            if (this.countLatch != null) {
-                this.countLatch.await();
-            }
-        } catch (InterruptedException e) {
-            log.error("在多线程下等待测量结果结束时出错!", e);
-            Thread.currentThread().interrupt();
-        } finally {
-            if (this.executorService != null) {
-                this.executorService.shutdown();
-            }
+    protected void shutdown() {
+        if (this.executorService != null) {
+            this.executorService.shutdown();
         }
     }
 
