@@ -116,6 +116,10 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
     /**
      * 等待所有线程执行完毕，并最终关闭线程池.
+     *
+     * @param countLatch 计数锁
+     * @author blinkfox on 2020-05-25.
+     * @since v1.2.0
      */
     private void await(CountDownLatch countLatch) {
         try {

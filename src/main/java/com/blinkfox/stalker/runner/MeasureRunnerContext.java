@@ -145,7 +145,7 @@ public final class MeasureRunnerContext {
     public static Measurement queryMeasurement(String sessionId) {
         RunnerInfo runnerInfo = measureMap.get(sessionId);
         if (runnerInfo == null) {
-            throw new StalkerException(StrKit.format("根据当前 sessionId【{}】无法找到对应的运行任务，"
+            throw new StalkerException(StrKit.format("【Stalker 异常】根据当前 sessionId【{}】无法找到对应的运行任务，"
                     + "或者该任务已过期，请重新开始执行。", sessionId));
         }
         return new MeasurementCollector().collect(runnerInfo.getMeasureRunner().buildRunningMeasurement());
@@ -162,7 +162,7 @@ public final class MeasureRunnerContext {
     public static List<Object> query(String sessionId) {
         RunnerInfo runnerInfo = measureMap.get(sessionId);
         if (runnerInfo == null) {
-            throw new StalkerException(StrKit.format("根据当前 sessionId【{}】无法找到对应的运行任务，"
+            throw new StalkerException(StrKit.format("【Stalker 异常】根据当前 sessionId【{}】无法找到对应的运行任务，"
                     + "或者该任务已过期，请重新开始执行。", sessionId));
         }
         return new MeasureOutputContext().output(runnerInfo.getOptions(),

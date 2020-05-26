@@ -159,7 +159,7 @@ public class Stalker {
     public Measurement[] runStatis(Options options, Runnable... runnables) {
         int len;
         if (options == null || runnables == null || (len = runnables.length) == 0) {
-            throw new IllegalArgumentException("options or runnables is null (or empty)!");
+            throw new IllegalArgumentException("【Stalker 参数异常】options or runnables is null (or empty)!");
         }
 
         // 循环遍历测量各个 Runnable 实例的性能结果，然后将各个结果存放到数组中，最后统一输出出来.
