@@ -60,4 +60,12 @@ public class StrKitTest {
         Assert.assertEquals("27.00", StrKit.roundToString(26.998));
     }
 
+    /**
+     * 测试获取 UUID.
+     */
+    @Test
+    public void get62RadixUuid() {
+        Assert.assertEquals(19, StrKit.get62RadixUuid().length());
+    }
+
 }

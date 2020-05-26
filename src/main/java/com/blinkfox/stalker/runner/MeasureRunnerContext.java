@@ -1,6 +1,5 @@
 package com.blinkfox.stalker.runner;
 
-import com.blinkfox.IdWorker;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.exception.StalkerException;
 import com.blinkfox.stalker.kit.StrKit;
@@ -37,11 +36,6 @@ public final class MeasureRunnerContext {
      * 用来存储 {@link MeasureRunner} 的容器，Key 是运行时的 sessionId, value 是 {@link RunnerInfo} 的实例.
      */
     private static final Map<String, RunnerInfo> measureMap = new ConcurrentHashMap<>();
-
-    /**
-     * 使用雪花算法生成短 ID 的生成器.
-     */
-    public static final IdWorker idWorker = new IdWorker();
 
     /**
      * 运行测量的性能参数配置选项.
@@ -128,7 +122,7 @@ public final class MeasureRunnerContext {
         MeasureRunner measureRunner = options.getThreads() > 1 && options.getConcurrens() > 1
                 ? new ConcurrentMeasureRunner()
                 : new SimpleMeasureRunner();
-        String sessionId = idWorker.get62RadixId();
+        String sessionId = StrKit.get62RadixUuid();
         measureMap.put(sessionId, new RunnerInfo(options, measureRunner));
         executor.execute(() -> measureRunner.run(options, runnable));
         return sessionId;

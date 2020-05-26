@@ -2,6 +2,7 @@ package com.blinkfox.stalker.kit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 import lombok.experimental.UtilityClass;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -50,7 +51,7 @@ public class StrKit {
      * @param args 参数
      * @return 格式化后的字符串
      */
-    public static String format(String pattern, Object... args) {
+    public String format(String pattern, Object... args) {
         return pattern == null ? "" : MessageFormatter.arrayFormat(pattern, args).getMessage();
     }
 
@@ -96,6 +97,20 @@ public class StrKit {
      */
     public String roundToString(double d) {
         return BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).toString();
+    }
+
+    /**
+     * 获取 {@code 62} 进制的长度为 19 位长度的 {@code UUID} 字符串.
+     *
+     * @return {@code 62} 进制位的 {@code UUID}
+     */
+    public String get62RadixUuid() {
+        UUID uuid = UUID.randomUUID();
+        return join(RadixKit.digits(uuid.getMostSignificantBits() >> 32, 8),
+                RadixKit.digits(uuid.getMostSignificantBits() >> 16, 4),
+                RadixKit.digits(uuid.getMostSignificantBits(), 4),
+                RadixKit.digits(uuid.getLeastSignificantBits() >> 48, 4),
+                RadixKit.digits(uuid.getLeastSignificantBits(), 12));
     }
 
 }
