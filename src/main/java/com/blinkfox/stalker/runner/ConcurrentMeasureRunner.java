@@ -1,8 +1,13 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.kit.ConcurrentHashSet;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +24,24 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
     private static final int N_1024 = 1024;
 
     /**
+     * 用于异步移除已经执行完成的线程的后台任务线程池.
+     */
+    private final ExecutorService backExecutorService;
+
+    /**
+     * 用于存放正在运行中的 Future 线程，便于在手动"停止"运行时，能取消正在执行中的任务.
+     */
+    private final Set<CompletableFuture<Void>> runningFutures;
+
+    /**
      * 构造方法.
      *
      * <p>这个类中的属性，需要支持高并发写入.</p>
      */
     public ConcurrentMeasureRunner() {
         super();
+        this.backExecutorService = Executors.newSingleThreadExecutor();
+        this.runningFutures = new ConcurrentHashSet<>();
     }
 
     /**
@@ -49,25 +66,28 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
         for (int i = 0; i < threads; i++) {
-            executorService.submit(() -> {
-                try {
-                    semaphore.acquire();
+            try {
+                semaphore.acquire();
+                final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     this.loopMeasure(runs, printErrorLog, runnable);
                     semaphore.release();
-                } catch (InterruptedException e) {
-                    log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息出错!", e);
-                    Thread.currentThread().interrupt();
-                } finally {
                     countLatch.countDown();
-                }
-            });
+                }, super.executorService);
+
+                // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
+                runningFutures.add(future);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), backExecutorService);
+            } catch (InterruptedException e) {
+                log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
+            }
         }
 
-        // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池，最后将结果封装成实体信息返回.
+        // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         this.await(countLatch);
         super.endNanoTime = System.nanoTime();
         super.complete.compareAndSet(false, true);
         super.shutdown();
+        this.backExecutorService.shutdown();
         return super.buildFinalMeasurement();
     }
 
@@ -109,7 +129,20 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         if (!isComplete()) {
             super.endNanoTime = System.nanoTime();
             super.complete.compareAndSet(false, true);
+
+            // 停止时直接关闭线程池.
             super.shutdownNowQuietly();
+            this.backExecutorService.shutdownNow();
+
+            // 迭代删除正在运行中的 Future，并取消正在运行中的任务.
+            Iterator<CompletableFuture<Void>> futureIterator = this.runningFutures.iterator();
+            while (futureIterator.hasNext()) {
+                CompletableFuture<Void> future = futureIterator.next();
+                this.runningFutures.remove(future);
+                if (!future.isDone()) {
+                    future.cancel(true);
+                }
+            }
         }
         return true;
     }
@@ -128,7 +161,6 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
             }
         } catch (InterruptedException e) {
             log.error("【Stalker 错误提示】在并发执行下等待任务执行结束时出错!", e);
-            Thread.currentThread().interrupt();
         }
     }
 
