@@ -4,6 +4,7 @@ import com.blinkfox.stalker.output.MeasureOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 
 /**
@@ -39,6 +40,13 @@ public class Options {
      * 执行的运行次数.
      */
     private int runs;
+
+    /**
+     * 运行的持续时间.
+     *
+     * @since v1.2.0
+     */
+    private RunDuration duration;
 
     /**
      * 是否打印出执行错误(异常运行)的日志，默认是false.
@@ -153,6 +161,92 @@ public class Options {
     }
 
     /**
+     * 根据'持续时间的量'、'持续时间的单位'来构建 Options 实例.
+     *
+     * @param amount 运行持续时间的量
+     * @param timeUnit 运行持续时间的单位
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDuration(long amount, TimeUnit timeUnit) {
+        Options options = of(1, 1);
+        options.runs = 1;
+        options.duration = RunDuration.of(amount, timeUnit);
+        return options;
+    }
+
+    /**
+     * 根据'持续时间的量'、'持续时间的单位'和'并发数'来构建 Options 实例.
+     *
+     * @param amount 运行持续时间的量
+     * @param timeUnit 运行持续时间的单位
+     * @param concurrens 并发数
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDuration(long amount, TimeUnit timeUnit, int concurrens) {
+        Options options = of(1, 1);
+        options.concurrens = concurrens;
+        options.runs = 1;
+        options.duration = RunDuration.of(amount, timeUnit);
+        return options;
+    }
+
+    /**
+     * 根据'持续秒数的量'和'并发数'来构建 Options 实例.
+     *
+     * @param amount 运行持续秒数的量
+     * @param concurrens 并发数
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDurationSeconds(long amount, int concurrens) {
+        return ofDuration(amount, TimeUnit.SECONDS, concurrens);
+    }
+
+    /**
+     * 根据'持续分钟数的量'和'并发数'来构建 Options 实例.
+     *
+     * @param amount 运行持续分钟数的量
+     * @param concurrens 并发数
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDurationMinutes(long amount, int concurrens) {
+        return ofDuration(amount, TimeUnit.MINUTES, concurrens);
+    }
+
+    /**
+     * 根据'持续小时数的量'和'并发数'来构建 Options 实例.
+     *
+     * @param amount 运行持续小时数的量
+     * @param concurrens 并发数
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDurationHours(long amount, int concurrens) {
+        return ofDuration(amount, TimeUnit.HOURS, concurrens);
+    }
+
+    /**
+     * 根据'持续天数的量'和'并发数'来构建 Options 实例.
+     *
+     * @param amount 运行持续小时数的量
+     * @param concurrens 并发数
+     * @return Options实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public static Options ofDurationDays(long amount, int concurrens) {
+        return ofDuration(amount, TimeUnit.DAYS, concurrens);
+    }
+
+    /**
      * 校验需要进行测量的 Options 选项参数是否合法，如果不合法，则抛出异常.
      */
     public void valid() {
@@ -227,10 +321,24 @@ public class Options {
      * 设置执行次数的 runs 的属性值.
      *
      * @param runs 运行次数
-     * @return Options实例
+     * @return Options 实例
      */
     public Options runs(int runs) {
         this.runs = runs;
+        return this;
+    }
+
+    /**
+     * 设置运行的持续时间.
+     *
+     * @param amount 持续时间的量
+     * @param timeUnit 持续时间的单位
+     * @return Options 实例
+     * @author blinkfox on 2020-06-01.
+     * @since v1.2.0
+     */
+    public Options duration(long amount, TimeUnit timeUnit) {
+        this.duration = RunDuration.of(amount, timeUnit);
         return this;
     }
 

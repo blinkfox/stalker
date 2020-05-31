@@ -26,12 +26,12 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
     /**
      * 用于异步移除已经执行完成的线程的后台任务线程池.
      */
-    private final ExecutorService backExecutorService;
+    protected final ExecutorService backExecutorService;
 
     /**
      * 用于存放正在运行中的 Future 线程，便于在手动"停止"运行时，能取消正在执行中的任务.
      */
-    private final Set<CompletableFuture<Void>> runningFutures;
+    protected final Set<CompletableFuture<Void>> runningFutures;
 
     /**
      * 构造方法.
