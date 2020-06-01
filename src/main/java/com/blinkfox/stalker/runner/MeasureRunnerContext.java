@@ -88,9 +88,15 @@ public final class MeasureRunnerContext {
      */
     public OverallResult run(Runnable runnable) {
         warmup(options, runnable);
-        return options.getThreads() > 1 && options.getConcurrens() > 1
-                ? new ConcurrentMeasureRunner().run(options, runnable)
-                : new SimpleMeasureRunner().run(options, runnable);
+        if (options.getDuration() != null) {
+            return options.getConcurrens() > 1
+                    ? new ConcurrentScheduledMeasureRunner().run(options, runnable)
+                    : new SimpleScheduledMeasureRunner().run(options, runnable);
+        } else {
+            return options.getConcurrens() > 1
+                    ? new ConcurrentMeasureRunner().run(options, runnable)
+                    : new SimpleMeasureRunner().run(options, runnable);
+        }
     }
 
     /**
@@ -118,10 +124,18 @@ public final class MeasureRunnerContext {
         // 预热运行.
         warmup(options, runnable);
 
-        // 将 measureRunner 存储到 map 中，并异步执行任务.
-        MeasureRunner measureRunner = options.getThreads() > 1 && options.getConcurrens() > 1
-                ? new ConcurrentMeasureRunner()
-                : new SimpleMeasureRunner();
+        // 获取对应的 measureRunner，并将 measureRunner 存储到 map 中，并异步执行任务.
+        MeasureRunner measureRunner;
+        if (options.getDuration() != null) {
+            measureRunner = options.getConcurrens() > 1
+                    ? new ConcurrentScheduledMeasureRunner()
+                    : new SimpleScheduledMeasureRunner();
+        } else {
+            measureRunner = options.getConcurrens() > 1
+                    ? new ConcurrentMeasureRunner()
+                    : new SimpleMeasureRunner();
+        }
+
         String sessionId = StrKit.get62RadixUuid();
         measureMap.put(sessionId, new RunnerInfo(options, measureRunner));
         executor.execute(() -> measureRunner.run(options, runnable));

@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
-    private static final int N_1024 = 1024;
+    protected static final int N_1024 = 1024;
 
     /**
      * 用于异步移除已经执行完成的线程的后台任务线程池.
@@ -76,7 +76,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
                 // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
                 runningFutures.add(future);
-                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), backExecutorService);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), this.backExecutorService);
             } catch (InterruptedException e) {
                 log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
             }
@@ -98,7 +98,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      * @param printErrorLog 是否打印输出错误日志
      * @param runnable 可执行实例
      */
-    private void loopMeasure(int runs, boolean printErrorLog, final Runnable runnable) {
+    protected void loopMeasure(int runs, boolean printErrorLog, final Runnable runnable) {
         for (int j = 0; j < runs; j++) {
             try {
                 long eachStart = System.nanoTime();
@@ -125,6 +125,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      * @author blinkfox on 2020-05-25.
      * @since v1.2.0
      */
+    @Override
     public boolean stop() {
         if (!isComplete()) {
             super.endNanoTime = System.nanoTime();

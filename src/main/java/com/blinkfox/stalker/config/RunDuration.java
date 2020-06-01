@@ -2,7 +2,6 @@ package com.blinkfox.stalker.config;
 
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 程序运行的持续时间实体类.
@@ -23,20 +22,6 @@ public class RunDuration {
      */
     @Getter
     private final TimeUnit timeUnit;
-
-    /**
-     * 开始执行时的纳秒时间戳.
-     */
-    @Getter
-    @Setter
-    private long startNanoTime;
-
-    /**
-     * 结束执行时的纳秒时间戳.
-     */
-    @Getter
-    @Setter
-    private long endNanoTime;
 
     /**
      * 构造方法.
@@ -103,6 +88,33 @@ public class RunDuration {
     public static RunDuration ofDays(long amount) {
         checkAmount(amount);
         return new RunDuration(amount, TimeUnit.DAYS);
+    }
+
+    /**
+     * 根据开始纳秒时间和持续时间计算出期望的结束纳秒时间.
+     *
+     * @param startNanoTime 开始纳秒时间
+     * @return 结束纳秒时间
+     */
+    public long getEndNanoTime(long startNanoTime) {
+        switch(this.timeUnit) {
+            case NANOSECONDS :
+                return startNanoTime + amount;
+            case MICROSECONDS :
+                return startNanoTime + amount * 1000L;
+            case MILLISECONDS :
+                return startNanoTime + amount * 1000_000L;
+            case SECONDS:
+                return startNanoTime + amount * 1000_000_000L;
+            case MINUTES:
+                return startNanoTime + amount * 60_000_000_000L;
+            case HOURS:
+                return startNanoTime + amount * 3600_000_000_000L;
+            case DAYS:
+                return startNanoTime + amount * 86400_000_000_000L;
+            default :
+                return startNanoTime;
+        }
     }
 
     private static void checkParams(long amount, TimeUnit timeUnit) {
