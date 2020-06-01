@@ -5,6 +5,7 @@ import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -33,6 +34,30 @@ public class StalkerTest {
     @Test
     public void run() {
         Stalker.run(Options.of(100, 20), () -> new MyTestService().hello());
+    }
+
+    /**
+     * 测试有 duration 选项参数时的执行情况.
+     */
+    @Test
+    public void runWithDuration() {
+        Stalker.run(Options.ofDuration(1, TimeUnit.SECONDS), () -> new MyTestService().hello());
+    }
+
+    /**
+     * 测试有 duration 选项参数时的执行情况.
+     */
+    @Test
+    public void runWithDurationConcurrent() {
+        Stalker.run(Options.ofDurationSeconds(1, 3), () -> new MyTestService().hello());
+    }
+
+    /**
+     * 测试有 duration 选项参数时的执行情况.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void runWithDurationException() {
+        Stalker.run(Options.ofDuration(2, TimeUnit.MILLISECONDS), () -> new MyTestService().hello());
     }
 
     /**
@@ -139,6 +164,28 @@ public class StalkerTest {
             List<Object> results = Stalker.query(sessionId);
             Assert.assertNotNull(results.get(0));
             Thread.sleep(50L);
+        }
+
+        log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
+        Stalker.query(sessionId);
+
+        // 执行完成之后移除 sessionId.
+        Stalker.remove(sessionId);
+    }
+
+    /**
+     * 测试慢方法的执行情况.
+     */
+    @Test
+    public void submitWithSlowMethodDuration() throws InterruptedException {
+        String sessionId = Stalker.submit(Options.ofDurationSeconds(2, 4),
+                () -> new MyTestService().slowHello());
+        Assert.assertNotNull(sessionId);
+
+        while (Stalker.isRunning(sessionId)) {
+            List<Object> results = Stalker.query(sessionId);
+            Assert.assertNotNull(results.get(0));
+            Thread.sleep(500L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");

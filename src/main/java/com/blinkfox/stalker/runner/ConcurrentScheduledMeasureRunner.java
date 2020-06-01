@@ -87,8 +87,12 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         }
 
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
-        super.endNanoTime = System.nanoTime();
-        super.complete.compareAndSet(false, true);
+        if (super.endNanoTime == 0) {
+            super.endNanoTime = System.nanoTime();
+        }
+        if (!super.complete.get()) {
+            super.complete.compareAndSet(false, true);
+        }
         super.shutdown();
         super.backExecutorService.shutdown();
         this.scheduledExecutorService.shutdown();
