@@ -8,13 +8,12 @@ import com.blinkfox.stalker.result.MeasurementCollector;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.result.bean.RunnerInfo;
+import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,8 +28,8 @@ public final class MeasureRunnerContext {
     /**
      * 用于异步提交任务的线程池.
      */
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(1,
-            3, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(5));
+    private static final ThreadPoolExecutor executor =
+            StalkerExecutors.newThreadExecutor(4, 16, "stalker-measure-thread");
 
     /**
      * 用来存储 {@link MeasureRunner} 的容器，Key 是运行时的 sessionId, value 是 {@link RunnerInfo} 的实例.
@@ -138,7 +137,10 @@ public final class MeasureRunnerContext {
 
         String sessionId = StrKit.get62RadixUuid();
         measureMap.put(sessionId, new RunnerInfo(options, measureRunner));
-        executor.execute(() -> measureRunner.run(options, runnable));
+        executor.execute(() -> {
+            log.info("已经添加了新的执行任务.");
+            measureRunner.run(options, runnable);
+        });
         return sessionId;
     }
 

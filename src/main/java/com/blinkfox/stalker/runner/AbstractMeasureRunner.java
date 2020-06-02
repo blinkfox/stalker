@@ -17,7 +17,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author blinkfox on 2020-05-24.
  * @see MeasureRunner
  * @see SimpleMeasureRunner
+ * @see SimpleScheduledMeasureRunner
  * @see ConcurrentMeasureRunner
+ * @see ConcurrentScheduledMeasureRunner
  * @since v1.2.0
  */
 @Slf4j
@@ -111,6 +113,17 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     }
 
     /**
+     * 如果结束时间的值是 0，那么就设置结束时的纳秒时间.
+     *
+     * @param endNanoTime 结束纳秒时间.
+     */
+    public void setEndNanoTimeIfEmpty(long endNanoTime) {
+        if (this.endNanoTime == 0) {
+            this.endNanoTime = endNanoTime;
+        }
+    }
+
+    /**
      * 构造正在运行中的任务的测量结果信息的 {@link OverallResult} 对象.
      *
      * @return 总体测量结果信息
@@ -125,17 +138,17 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         // 如果任务仍然在运行中，由于各个计数器是独立的，对于整体上的各个统计数据的结果来说，并不能保证"线程安全".
         // 为了减小仍在运行中时的任务，获取各个统计数据时线程安全所导致的误差.
         // 这里只获取 eachMeasures 和 failure 两个值，基于这两个值来计算其他值，消耗的时间使用当前时间来计算.
-        long failure = this.getFailure();
-        long[] eachCosts = this.getEachMeasures();
-        long totalCount = eachCosts.length;
-        long costs = this.startNanoTime == 0 ? 0 : System.nanoTime() - this.startNanoTime;
+        final long currFailure = this.getFailure();
+        final long[] currEachCosts = this.getEachMeasures();
+        long currTotalCount = currEachCosts.length;
+        long currCosts = this.startNanoTime == 0 ? 0 : System.nanoTime() - this.startNanoTime;
         return new OverallResult()
-                .setEachMeasures(eachCosts)
-                .setCosts(costs)
-                .setTotal(totalCount)
-                .setSuccess(totalCount - failure)
-                .setFailure(failure)
-                .setThroughput(MathKit.calcThroughput(totalCount, costs));
+                .setEachMeasures(currEachCosts)
+                .setCosts(currCosts)
+                .setTotal(currTotalCount)
+                .setSuccess(currTotalCount - currFailure)
+                .setFailure(currFailure)
+                .setThroughput(MathKit.calcThroughput(currTotalCount, currCosts));
     }
 
     /**
@@ -155,28 +168,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
                 .setSuccess(successCount)
                 .setFailure(failureCount)
                 .setThroughput(MathKit.calcThroughput(totalCount, this.getCosts()));
-    }
-
-    /**
-     * 等待所有线程执行完毕，并最终关闭线程池.
-     */
-    protected void shutdown() {
-        if (this.executorService != null) {
-            this.executorService.shutdown();
-        }
-    }
-
-    /**
-     * 立即安静的关闭线程池.
-     */
-    protected void shutdownNowQuietly() {
-        if (this.executorService != null) {
-            try {
-                this.executorService.shutdownNow();
-            } catch (Exception e) {
-                log.error("【Stalker 错误】关闭测量任务的线程池失败，失败原因：【{}】.", e.getMessage());
-            }
-        }
     }
 
 }

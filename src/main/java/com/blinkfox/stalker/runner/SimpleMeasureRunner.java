@@ -2,6 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
@@ -20,14 +21,13 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
      *
      * @since v1.2.0
      */
-    protected Future<?> measureTask;
+    protected Future<?> measureFuture;
 
     /**
      * 构造方法.
      */
     public SimpleMeasureRunner() {
         super();
-        super.executorService = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -41,11 +41,12 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
     public OverallResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
+        super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-measure-thread");
         super.startNanoTime = System.nanoTime();
 
         // 由于并发数是 1，直接单线程循环执行 (runs * threads) 次即可，
         // 将执行的相关任务以 Future 的形式来执行，便于程序动态取消任务或判断任务执行情况等.
-        this.measureTask = executorService.submit(() -> {
+        this.measureFuture = executorService.submit(() -> {
             for (int i = 0; i < totalCount; ++i) {
                 try {
                     // 开始执行测量任务，记录开始时间、执行次数等.
@@ -64,41 +65,37 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
 
         // 阻塞调用要执行的测量任务，达到等待任务结束的目的.
         try {
-            this.measureTask.get();
+            this.measureFuture.get();
         } catch (Exception e) {
             log.error("【Stalker 错误】执行测量任务发生错误！", e);
         }
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        super.endNanoTime = System.nanoTime();
+        super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.complete.compareAndSet(false, true);
-        super.shutdown();
+        StalkerExecutors.shutdown(super.executorService);
         return super.buildFinalMeasurement();
     }
 
     /**
      * 停止相关的运行测量任务.
      *
-     * @return 是否成功的布尔值
      * @author blinkfox on 2020-05-25.
      * @since v1.2.0
      */
-    public boolean stop() {
-        if (isComplete()) {
-            log.info("【Stalker 提示】任务已完成，将不再暂停测量任务.");
-            return true;
-        }
+    @Override
+    public void stop() {
+        if (!isComplete()) {
+            super.setEndNanoTimeIfEmpty(System.nanoTime());
+            super.complete.compareAndSet(false, true);
 
-        super.endNanoTime = System.nanoTime();
-        super.complete.compareAndSet(false, true);
-
-        // 立即关闭线程池.
-        super.shutdownNowQuietly();
-        // 取消正在执行中的任务.
-        if (this.measureTask != null && !this.measureTask.isDone()) {
-            return this.measureTask.cancel(true);
+            // 立即关闭线程池.
+            StalkerExecutors.shutdownNow(super.executorService);
+            // 取消正在执行中的任务.
+            if (this.measureFuture != null && !this.measureFuture.isDone()) {
+                this.measureFuture.cancel(true);
+            }
         }
-        return true;
     }
 
 }

@@ -3,12 +3,12 @@ package com.blinkfox.stalker.runner;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.ConcurrentHashSet;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,12 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
-    protected static final int N_1024 = 1024;
-
     /**
      * 用于异步移除已经执行完成的线程的后台任务线程池.
      */
-    protected final ExecutorService backExecutorService;
+    protected final ExecutorService recordExecutorService;
 
     /**
      * 用于存放正在运行中的 Future 线程，便于在手动"停止"运行时，能取消正在执行中的任务.
@@ -40,7 +38,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      */
     public ConcurrentMeasureRunner() {
         super();
-        this.backExecutorService = Executors.newSingleThreadExecutor();
+        this.recordExecutorService = StalkerExecutors.newSingleThreadExecutor("concurrent-record-thread");
         this.runningFutures = new ConcurrentHashSet<>();
     }
 
@@ -59,9 +57,9 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         boolean printErrorLog = options.isPrintErrorLog();
 
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
-        Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
+        Semaphore semaphore = new Semaphore(concurrens);
         CountDownLatch countLatch = new CountDownLatch(threads);
-        super.executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
+        super.executorService = StalkerExecutors.newFixedThreadExecutor(threads, "concurrent-measure-thread");
         super.startNanoTime = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
@@ -76,18 +74,18 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
                 // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
                 runningFutures.add(future);
-                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), this.backExecutorService);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), this.recordExecutorService);
             } catch (InterruptedException e) {
                 log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
+                Thread.currentThread().interrupt();
             }
         }
 
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         this.await(countLatch);
-        super.endNanoTime = System.nanoTime();
+        super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.complete.compareAndSet(false, true);
-        super.shutdown();
-        this.backExecutorService.shutdown();
+        StalkerExecutors.shutdown(this.executorService, this.recordExecutorService);
         return super.buildFinalMeasurement();
     }
 
@@ -121,19 +119,17 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      * <p>注意：如果任务未完成，则立即停止线程池，但是还不能停止正在运行中的若干任务线程，
      * 暂时还没想到一个更好的、高性能的停止所有运行中的任务的方法.</p>
      *
-     * @return 是否成功的布尔值
      * @author blinkfox on 2020-05-25.
      * @since v1.2.0
      */
     @Override
-    public boolean stop() {
+    public void stop() {
         if (!isComplete()) {
-            super.endNanoTime = System.nanoTime();
+            super.setEndNanoTimeIfEmpty(System.nanoTime());
             super.complete.compareAndSet(false, true);
 
             // 停止时直接关闭线程池.
-            super.shutdownNowQuietly();
-            this.backExecutorService.shutdownNow();
+            StalkerExecutors.shutdownNow(this.executorService, this.recordExecutorService);
 
             // 迭代删除正在运行中的 Future，并取消正在运行中的任务.
             Iterator<CompletableFuture<Void>> futureIterator = this.runningFutures.iterator();
@@ -145,7 +141,6 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                 }
             }
         }
-        return true;
     }
 
     /**
@@ -162,6 +157,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
             }
         } catch (InterruptedException e) {
             log.error("【Stalker 错误提示】在并发执行下等待任务执行结束时出错!", e);
+            Thread.currentThread().interrupt();
         }
     }
 

@@ -3,8 +3,8 @@ package com.blinkfox.stalker.runner;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.RunDuration;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -38,8 +38,9 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
      */
     public ConcurrentScheduledMeasureRunner() {
         super();
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        super.executorService = Executors.newFixedThreadPool(N_1024);
+        this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "concurrent-scheduled-thread");
+        super.executorService = StalkerExecutors.newFixedThreadExecutor(
+                StalkerExecutors.MAX_POOL_SIZE, "concurrent-measure-thread");
     }
 
     /**
@@ -60,7 +61,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
 
         // 到指定的持续时间之后，就取消执行中的任务,并关闭线程池.
         final RunDuration duration = options.getDuration();
-        this.scheduledFuture = this.scheduledExecutorService.schedule((Runnable) this::stop,
+        this.scheduledFuture = this.scheduledExecutorService.schedule(this::stop,
                 duration.getAmount(), duration.getTimeUnit());
 
         super.startNanoTime = System.nanoTime();
@@ -80,22 +81,17 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
 
                 // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
                 runningFutures.add(future);
-                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), super.backExecutorService);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), super.recordExecutorService);
             } catch (InterruptedException e) {
                 log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
+                Thread.currentThread().interrupt();
             }
         }
 
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
-        if (super.endNanoTime == 0) {
-            super.endNanoTime = System.nanoTime();
-        }
-        if (!super.complete.get()) {
-            super.complete.compareAndSet(false, true);
-        }
-        super.shutdown();
-        super.backExecutorService.shutdown();
-        this.scheduledExecutorService.shutdown();
+        super.setEndNanoTimeIfEmpty(System.nanoTime());
+        super.complete.compareAndSet(false, true);
+        StalkerExecutors.shutdown(this.executorService, this.recordExecutorService, this.scheduledExecutorService);
         if (!this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }
@@ -104,22 +100,16 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
 
     /**
      * 停止相关的运行测量任务.
-     *
-     * <p>注意：如果任务未完成，则立即停止线程池，但是还不能停止正在运行中的若干任务线程，
-     * 暂时还没想到一个更好的、高性能的停止所有运行中的任务的方法.</p>
-     *
-     * @return 是否成功的布尔值
      */
     @Override
-    public boolean stop() {
+    public void stop() {
         super.stop();
 
         // 关闭定时任务线程池和取消对应的定时任务.
-        this.scheduledExecutorService.shutdown();
+        StalkerExecutors.shutdown(this.scheduledExecutorService);
         if (this.scheduledFuture != null && !this.scheduledFuture.isDone()) {
-            return this.scheduledFuture.cancel(true);
+            this.scheduledFuture.cancel(true);
         }
-        return true;
     }
 
 }
