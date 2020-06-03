@@ -84,7 +84,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
 
                 // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
                 runningFutures.add(future);
-                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), super.recordExecutorService);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future));
             } catch (InterruptedException e) {
                 log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
                 Thread.currentThread().interrupt();
@@ -94,7 +94,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(this.executorService, this.recordExecutorService, this.scheduledExecutorService);
+        StalkerExecutors.shutdown(this.executorService, this.scheduledExecutorService);
         if (!this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }

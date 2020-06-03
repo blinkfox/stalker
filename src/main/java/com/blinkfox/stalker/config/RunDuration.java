@@ -97,7 +97,7 @@ public class RunDuration {
      * @return 结束纳秒时间
      */
     public long getEndNanoTime(long startNanoTime) {
-        switch(this.timeUnit) {
+        switch (this.timeUnit) {
             case NANOSECONDS :
                 return startNanoTime + amount;
             case MICROSECONDS :

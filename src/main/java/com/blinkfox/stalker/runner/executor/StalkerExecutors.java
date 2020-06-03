@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StalkerExecutors {
 
-    private static final int MAX_QUEUE_SIZE = 65535;
+    private static final int MAX_QUEUE_SIZE = 524280;
 
     public static final int MAX_POOL_SIZE = 1024;
 

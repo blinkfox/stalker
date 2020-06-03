@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,11 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
     /**
-     * 用于异步移除已经执行完成的线程的后台任务线程池.
-     */
-    protected final ExecutorService recordExecutorService;
-
-    /**
      * 用于存放正在运行中的 Future 线程，便于在手动"停止"运行时，能取消正在执行中的任务.
      */
     protected final Set<CompletableFuture<Void>> runningFutures;
@@ -38,7 +32,6 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      */
     public ConcurrentMeasureRunner() {
         super();
-        this.recordExecutorService = StalkerExecutors.newSingleThreadExecutor("concurrent-record-thread");
         this.runningFutures = new ConcurrentHashSet<>();
     }
 
@@ -74,7 +67,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
                 // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
                 runningFutures.add(future);
-                future.whenCompleteAsync((a, b) -> runningFutures.remove(future), this.recordExecutorService);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future));
             } catch (InterruptedException e) {
                 log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
                 Thread.currentThread().interrupt();
@@ -85,7 +78,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         this.await(countLatch);
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(this.executorService, this.recordExecutorService);
+        StalkerExecutors.shutdown(this.executorService);
         return super.buildFinalMeasurement();
     }
 
@@ -130,7 +123,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
             super.canceled.compareAndSet(false, true);
 
             // 停止时直接关闭线程池.
-            StalkerExecutors.shutdownNow(this.executorService, this.recordExecutorService);
+            StalkerExecutors.shutdownNow(this.executorService);
 
             // 迭代删除正在运行中的 Future，并取消正在运行中的任务.
             Iterator<CompletableFuture<Void>> futureIterator = this.runningFutures.iterator();
