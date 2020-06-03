@@ -20,6 +20,13 @@ public class StatisResult {
     private long sum;
 
     /**
+     * 总次数.
+     *
+     * @since v1.2.0
+     */
+    private long total;
+
+    /**
      * 平均耗时.
      */
     private long avg;
@@ -33,6 +40,13 @@ public class StatisResult {
      * 最大耗时.
      */
     private long max;
+
+    /**
+     * 方差和，该值表示各个值与平均值的差的平方和.
+     *
+     * @since v1.2.0
+     */
+    private double varSum;
 
     /**
      * 标准差.

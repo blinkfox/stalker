@@ -2,6 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.bean.StatisResult;
 
 /**
  * 用于测量待执行方法耗时情况等信息的运行器接口.
@@ -103,6 +104,9 @@ public interface MeasureRunner {
 
     /**
      * 停止相关的运行测量任务.
+     *
+     * @author blinkfox on 2020-06-03.
+     * @since v1.2.0
      */
     void stop();
 
@@ -110,6 +114,8 @@ public interface MeasureRunner {
      * 构建运行中的任务的总体测量结果信息.
      *
      * @return 总体测量结果信息
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
      */
     OverallResult buildRunningMeasurement();
 
@@ -121,5 +127,14 @@ public interface MeasureRunner {
      * @since v1.2.0
      */
     OverallResult buildFinalMeasurement();
+
+    /**
+     * 获取直到最后一次累计构建的统计结果信息.
+     *
+     * @return 直到最后一次累计构建的统计结果信息
+     * @author blinkfox on 2020-06-04.
+     * @since v1.2.0
+     */
+    StatisResult getLastStatisResult();
 
 }

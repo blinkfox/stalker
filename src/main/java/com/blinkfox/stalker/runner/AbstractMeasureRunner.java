@@ -2,6 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.kit.MathKit;
 import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.bean.StatisResult;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,9 +27,20 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractMeasureRunner implements MeasureRunner {
 
     /**
+     * 每隔 10 万，累计一次统计计数，并清空 {@code eachMeasures} 队列中的数据，防止内存溢出.
+     */
+    protected static final int MAX_PERIOD_COUNT = 100000;
+
+    /**
      * 线程池.
      */
     protected ExecutorService executorService;
+
+    /**
+     * 直到最后一次累计构建的统计结果信息.
+     */
+    @Getter
+    protected StatisResult lastStatisResult;
 
     /**
      * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒({@code ns}).
