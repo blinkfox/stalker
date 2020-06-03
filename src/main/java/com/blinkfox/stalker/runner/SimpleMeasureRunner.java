@@ -3,7 +3,6 @@ package com.blinkfox.stalker.runner;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,7 +71,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
 
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
-        super.complete.compareAndSet(false, true);
+        super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService);
         return super.buildFinalMeasurement();
     }
@@ -85,9 +84,10 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
      */
     @Override
     public void stop() {
-        if (!isComplete()) {
+        if (!isCompleted()) {
             super.setEndNanoTimeIfEmpty(System.nanoTime());
-            super.complete.compareAndSet(false, true);
+            super.completed.compareAndSet(false, true);
+            super.canceled.compareAndSet(false, true);
 
             // 立即关闭线程池.
             StalkerExecutors.shutdownNow(super.executorService);

@@ -82,7 +82,7 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
 
         // 如果没有设置相关的结束信息资源，就设置，没有关闭相关的资源就进行关闭.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
-        super.complete.compareAndSet(false, true);
+        super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService, this.scheduledExecutorService);
         return super.buildFinalMeasurement();
     }

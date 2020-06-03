@@ -63,7 +63,16 @@ public interface MeasureRunner {
      * @author blinkfox on 2020-05-23.
      * @since v1.2.0
      */
-    boolean isComplete();
+    boolean isCompleted();
+
+    /**
+     * 判断当前任务是否已经被取消.
+     *
+     * @return 是否被取消的布尔值
+     * @author blinkfox on 2020-06-02.
+     * @since v1.2.0
+     */
+    boolean isCancelled();
 
     /**
      * 获取任务开始运行时的纳秒时间戳.

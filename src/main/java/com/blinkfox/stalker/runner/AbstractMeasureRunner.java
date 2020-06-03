@@ -48,7 +48,12 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     /**
      * 是否已经运行完成.
      */
-    protected AtomicBoolean complete;
+    protected AtomicBoolean completed;
+
+    /**
+     * 是否已经被取消.
+     */
+    protected AtomicBoolean canceled;
 
     /**
      * 运行开始时的纳秒时间戳，单位为纳秒({@code ns}).
@@ -69,7 +74,8 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         this.eachMeasures = new ConcurrentLinkedQueue<>();
         this.success = new LongAdder();
         this.failure = new LongAdder();
-        this.complete = new AtomicBoolean(false);
+        this.completed = new AtomicBoolean(false);
+        this.canceled = new AtomicBoolean(false);
     }
 
     @Override
@@ -103,8 +109,13 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     }
 
     @Override
-    public boolean isComplete() {
-        return this.complete.get();
+    public boolean isCompleted() {
+        return this.completed.get();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.canceled.get();
     }
 
     @Override
@@ -131,7 +142,7 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     @Override
     public OverallResult buildRunningMeasurement() {
         // 如果任务已经完成，就直接返回最终的测试结果数据即可.
-        if (this.complete.get()) {
+        if (this.completed.get()) {
             return this.buildFinalMeasurement();
         }
 

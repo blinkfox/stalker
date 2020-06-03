@@ -84,7 +84,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         this.await(countLatch);
         super.setEndNanoTimeIfEmpty(System.nanoTime());
-        super.complete.compareAndSet(false, true);
+        super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(this.executorService, this.recordExecutorService);
         return super.buildFinalMeasurement();
     }
@@ -124,9 +124,10 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      */
     @Override
     public void stop() {
-        if (!isComplete()) {
+        if (!isCompleted()) {
             super.setEndNanoTimeIfEmpty(System.nanoTime());
-            super.complete.compareAndSet(false, true);
+            super.completed.compareAndSet(false, true);
+            super.canceled.compareAndSet(false, true);
 
             // 停止时直接关闭线程池.
             StalkerExecutors.shutdownNow(this.executorService, this.recordExecutorService);

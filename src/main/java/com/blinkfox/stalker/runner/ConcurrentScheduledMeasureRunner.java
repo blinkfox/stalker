@@ -90,7 +90,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
 
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
-        super.complete.compareAndSet(false, true);
+        super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(this.executorService, this.recordExecutorService, this.scheduledExecutorService);
         if (!this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
