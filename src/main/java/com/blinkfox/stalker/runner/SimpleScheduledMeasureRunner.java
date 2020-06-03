@@ -69,9 +69,12 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         });
 
         // 到指定的持续时间之后，就取消执行中的任务,并关闭线程池.
+        // 注意，由于是定时任务，所以“是否取消”也设置为 false，用于区分是否是人为取消了任务，只有人为取消的才是 true.
         final RunDuration duration = options.getDuration();
-        this.scheduledFuture = this.scheduledExecutorService.schedule(this::stop,
-                duration.getAmount(), duration.getTimeUnit());
+        this.scheduledFuture = this.scheduledExecutorService.schedule(() -> {
+            this.stop();
+            super.canceled.compareAndSet(true, false);
+        }, duration.getAmount(), duration.getTimeUnit());
 
         // 阻塞调用要执行的测量任务，达到阻塞等待任务结束的目的.
         try {

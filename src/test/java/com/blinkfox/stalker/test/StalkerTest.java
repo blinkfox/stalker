@@ -2,12 +2,12 @@ package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.result.StalkerFuture;
 import com.blinkfox.stalker.result.bean.Measurement;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -136,19 +136,17 @@ public class StalkerTest {
      */
     @Test
     public void submit() throws InterruptedException {
-        String sessionId = Stalker.submit(() -> new MyTestService().hello());
-        Assert.assertNotNull(sessionId);
+        StalkerFuture stalkerFuture = Stalker.submit(() -> new MyTestService().hello());
+        Assert.assertNotNull(stalkerFuture);
 
-        while (Stalker.isRunning(sessionId)) {
-            List<Object> results = Stalker.query(sessionId);
+        while (!stalkerFuture.isDone()) {
+            List<Object> results = stalkerFuture.get();
             Assert.assertNotNull(results.get(0));
             Thread.sleep(2L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
-        Stalker.query(sessionId);
-        // 执行完成之后移除 sessionId.
-        Stalker.remove(sessionId);
+        stalkerFuture.get();
     }
 
     /**
@@ -156,21 +154,18 @@ public class StalkerTest {
      */
     @Test
     public void submitWithSlowMethod() throws InterruptedException {
-        String sessionId = Stalker.submit(Options.of("SlowTest", 20, 5, 1),
+        StalkerFuture stalkerFuture = Stalker.submit(Options.of("SlowTest", 20, 5, 1),
                 () -> new MyTestService().slowHello());
-        Assert.assertNotNull(sessionId);
+        Assert.assertNotNull(stalkerFuture);
 
-        while (Stalker.isRunning(sessionId)) {
-            List<Object> results = Stalker.query(sessionId);
+        while (!stalkerFuture.isDone()) {
+            List<Object> results = stalkerFuture.get();
             Assert.assertNotNull(results.get(0));
             Thread.sleep(50L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
-        Stalker.query(sessionId);
-
-        // 执行完成之后移除 sessionId.
-        Stalker.remove(sessionId);
+        stalkerFuture.get();
     }
 
     /**
@@ -178,21 +173,23 @@ public class StalkerTest {
      */
     @Test
     public void submitWithSlowMethodDuration() throws InterruptedException {
-        String sessionId = Stalker.submit(Options.ofDurationSeconds(2, 4),
+        StalkerFuture stalkerFuture = Stalker.submit(Options.ofDurationSeconds(2, 4),
                 () -> new MyTestService().slowHello());
-        Assert.assertNotNull(sessionId);
+        Assert.assertNotNull(stalkerFuture);
+        Assert.assertEquals(0, stalkerFuture.getEndNanoTime());
 
-        while (Stalker.isRunning(sessionId)) {
-            List<Object> results = Stalker.query(sessionId);
+        while (!stalkerFuture.isDone()) {
+            List<Object> results = stalkerFuture.get();
             Assert.assertNotNull(results.get(0));
             Thread.sleep(500L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
-        Stalker.query(sessionId);
-
-        // 执行完成之后移除 sessionId.
-        Stalker.remove(sessionId);
+        stalkerFuture.get();
+        Assert.assertTrue(stalkerFuture.getStartNanoTime() > 0);
+        Assert.assertTrue(stalkerFuture.isDoneSuccessfully());
+        Assert.assertEquals(stalkerFuture.getTotal(), stalkerFuture.getSuccess() + stalkerFuture.getFailure());
+        Assert.assertTrue(stalkerFuture.getCosts() > 0);
     }
 
     /**
@@ -200,16 +197,17 @@ public class StalkerTest {
      */
     @Test
     public void queryMeasurement() throws InterruptedException {
-        String sessionId = Stalker.submit(() -> new MyTestService().hello());
-        Assert.assertNotNull(sessionId);
+        StalkerFuture stalkerFuture = Stalker.submit(() -> new MyTestService().hello());
+        Assert.assertNotNull(stalkerFuture);
 
-        while (Stalker.isRunning(sessionId)) {
-            Measurement measurement = Stalker.queryMeasurement(sessionId);
+        while (!stalkerFuture.isDone()) {
+            Measurement measurement = stalkerFuture.getMeasurement();
             Assert.assertNotNull(measurement);
             Thread.sleep(5L);
         }
-        // 执行完成之后移除 sessionId.
-        Stalker.remove(sessionId);
+
+        Assert.assertFalse(stalkerFuture.isCancelled());
+        Assert.assertNotNull(stalkerFuture.getOverallResult());
     }
 
     /**
@@ -217,32 +215,20 @@ public class StalkerTest {
      */
     @Test
     public void submitWithStop() throws InterruptedException {
-        String sessionId = Stalker.submit(Options.of("StopTest", 20, 5, 1),
+        StalkerFuture stalkerFuture = Stalker.submit(Options.of("StopTest", 20, 5, 1),
                 () -> new MyTestService().slowHello());
-        Assert.assertNotNull(sessionId);
+        Assert.assertNotNull(stalkerFuture);
 
         Thread.sleep(50L);
-        List<Object> results = Stalker.query(sessionId);
+        List<Object> results = stalkerFuture.get();
         Assert.assertNotNull(results.get(0));
-        Stalker.stop(sessionId);
+        stalkerFuture.cancel();
         log.info("任务已停止，获取停止前的执行结果.");
-        Stalker.query(sessionId);
+        stalkerFuture.get();
         Thread.sleep(100L);
 
-        log.info("任务已停止，获取最后的执行结果.");
-        Stalker.query(sessionId);
-
-        // 执行完成之后移除 sessionId.
-        Stalker.remove(sessionId);
-    }
-
-    /**
-     * 单测结束后执行的方法.
-     */
-    @AfterClass
-    public static void destroy() {
-        Assert.assertNotNull(Stalker.getAllSessions());
-        Stalker.clear();
+        log.info("任务已停止，再次获取最后的执行结果，判断内容是否一致.");
+        stalkerFuture.get();
     }
 
 }
