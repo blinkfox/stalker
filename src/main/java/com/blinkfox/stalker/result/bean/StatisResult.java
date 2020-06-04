@@ -15,16 +15,36 @@ import lombok.Setter;
 public class StatisResult {
 
     /**
-     * 总耗时.
+     * 测量代码在执行过程中所消耗的总耗时，单位为纳秒(ns).
      */
-    private long sum;
+    private long costs;
 
     /**
      * 总次数.
-     *
-     * @since v1.2.0
      */
     private long total;
+
+    /**
+     * 测量过程中执行成功的次数.
+     */
+    private long success;
+
+    /**
+     * 测量过程中执行失败的次数.
+     */
+    private long failure;
+
+    /**
+     * 吞吐率，指单位时间内（每秒）的执行总次数，即：{@code throughput = total / (costs / 10^9)}.
+     *
+     * @since v1.1.1
+     */
+    private double throughput;
+
+    /**
+     * 总耗时.
+     */
+    private long sum;
 
     /**
      * 平均耗时.
@@ -40,13 +60,6 @@ public class StatisResult {
      * 最大耗时.
      */
     private long max;
-
-    /**
-     * 方差和，该值表示各个值与平均值的差的平方和.
-     *
-     * @since v1.2.0
-     */
-    private double varSum;
 
     /**
      * 标准差.

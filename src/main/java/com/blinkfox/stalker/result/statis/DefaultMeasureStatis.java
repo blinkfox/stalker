@@ -9,7 +9,7 @@ import com.blinkfox.stalker.result.bean.StatisResult;
  * @author blinkfox on 2019-01-10.
  * @since v1.0.0
  */
-public class DefaultMeasureStatis implements MeasureStatis {
+public class DefaultMeasureStatis {
 
     /**
      * 95%置信区间的 Z 值.
@@ -22,7 +22,6 @@ public class DefaultMeasureStatis implements MeasureStatis {
      * @param overallResult 测量结果数据
      * @return 性能结果数据
      */
-    @Override
     public StatisResult statis(OverallResult overallResult) {
         StatisResult statisResult = new StatisResult();
         long[] eachMeasures = overallResult.getEachMeasures();

@@ -1,9 +1,7 @@
 package com.blinkfox.stalker.runner;
 
-import com.blinkfox.stalker.kit.MathKit;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.MeasureStatistician;
 import com.blinkfox.stalker.result.bean.StatisResult;
-import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -27,14 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractMeasureRunner implements MeasureRunner {
 
     /**
-     * 每隔 10 万，累计一次统计计数，并清空 {@code eachMeasures} 队列中的数据，防止内存溢出.
-     */
-    protected static final int MAX_PERIOD_COUNT = 100000;
-
-    /**
      * 线程池.
      */
     protected ExecutorService executorService;
+
+    /**
+     * 测量统计器的实例对象.
+     */
+    private final MeasureStatistician measureStatistician;
 
     /**
      * 直到最后一次累计构建的统计结果信息.
@@ -80,9 +78,15 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     protected long endNanoTime;
 
     /**
+     * 用于记录以前总共读取了 eachMeasures 中的数据总量，即总的偏移量.
+     */
+    private long beforeCount;
+
+    /**
      * 公共的抽象父构造方法.
      */
     public AbstractMeasureRunner() {
+        this.measureStatistician = new MeasureStatistician();
         this.eachMeasures = new ConcurrentLinkedQueue<>();
         this.success = new LongAdder();
         this.failure = new LongAdder();
@@ -90,32 +94,14 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         this.canceled = new AtomicBoolean(false);
     }
 
-    @Override
-    public long[] getEachMeasures() {
-        // 为了不影响正在运行中的数据及当前或以后数据统计的"准确性"，这里复制一份队列中的数据来单独计算和返回.
-        Queue<Long> queue = new ArrayDeque<>(this.eachMeasures);
-        int len = queue.size();
-        long[] measures = new long[len];
-        for (int i = 0; i < len; i++) {
-            Long cost = queue.poll();
-            if (cost != null) {
-                measures[i] = cost;
-            }
-        }
-        return measures;
-    }
-
-    @Override
     public long getTotal() {
         return this.success.longValue() + this.failure.longValue();
     }
 
-    @Override
     public long getSuccess() {
         return this.success.longValue();
     }
 
-    @Override
     public long getFailure() {
         return this.failure.longValue();
     }
@@ -130,11 +116,6 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
         return this.canceled.get();
     }
 
-    @Override
-    public long getCosts() {
-        return this.endNanoTime - this.startNanoTime;
-    }
-
     /**
      * 如果结束时间的值是 0，那么就设置结束时的纳秒时间.
      *
@@ -147,50 +128,35 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
     }
 
     /**
-     * 构造正在运行中的任务的测量结果信息的 {@link OverallResult} 对象.
+     * 更新并获取统计结果信息数据，由于可能会有两个或多个线程去更新和获取统计数据，这里使用 {@code synchronized} 来同步.
      *
-     * @return 总体测量结果信息
+     * @return 统计结果信息
      */
     @Override
-    public OverallResult buildRunningMeasurement() {
+    public synchronized StatisResult getStatisResult() {
         // 如果任务已经完成，就直接返回最终的测试结果数据即可.
         if (this.completed.get()) {
-            return this.buildFinalMeasurement();
+            return measureStatistician.get();
         }
 
-        // 如果任务仍然在运行中，由于各个计数器是独立的，对于整体上的各个统计数据的结果来说，并不能保证"线程安全".
-        // 为了减小仍在运行中时的任务，获取各个统计数据时线程安全所导致的误差.
-        // 这里只获取 eachMeasures 和 failure 两个值，基于这两个值来计算其他值，消耗的时间使用当前时间来计算.
-        final long currFailure = this.getFailure();
-        final long[] currEachCosts = this.getEachMeasures();
-        long currTotalCount = currEachCosts.length;
+        // 获取到截至到当前时间的正确运行次数数、错误运行次数，消耗的时间和每次的运行时间等数据.
+        long currFailure = this.getFailure();
+        long currSuccess = this.getSuccess();
         long currCosts = this.startNanoTime == 0 ? 0 : System.nanoTime() - this.startNanoTime;
-        return new OverallResult()
-                .setEachMeasures(currEachCosts)
-                .setCosts(currCosts)
-                .setTotal(currTotalCount)
-                .setSuccess(currTotalCount - currFailure)
-                .setFailure(currFailure)
-                .setThroughput(MathKit.calcThroughput(currTotalCount, currCosts));
-    }
+        int len = (int) (currSuccess + currFailure - beforeCount);
 
-    /**
-     * 构造最终运行完时的测量的结果信息的 {@link OverallResult} 对象.
-     *
-     * @return 总体测量结果信息
-     */
-    @Override
-    public OverallResult buildFinalMeasurement() {
-        long successCount = this.success.longValue();
-        long failureCount = this.failure.longValue();
-        long totalCount = successCount + failureCount;
-        return new OverallResult()
-                .setEachMeasures(this.getEachMeasures())
-                .setCosts(this.getCosts())
-                .setTotal(totalCount)
-                .setSuccess(successCount)
-                .setFailure(failureCount)
-                .setThroughput(MathKit.calcThroughput(totalCount, this.getCosts()));
+        // 截取复制出最新的
+        Long[] currMeasures = new Long[len];
+        for (int i = 0; i < len; ++i) {
+            Long cost = this.eachMeasures.poll();
+            if (cost != null) {
+                currMeasures[i] = cost;
+            }
+        }
+        beforeCount = currSuccess + currFailure;
+
+        // 更新并获取最新的数据.
+        return measureStatistician.updateAndGet(currSuccess, currFailure, currCosts, currMeasures);
     }
 
 }

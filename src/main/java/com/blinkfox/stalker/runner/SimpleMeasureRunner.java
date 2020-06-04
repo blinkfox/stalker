@@ -51,7 +51,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
                     // 开始执行测量任务，记录开始时间、执行次数等.
                     long eachStart = System.nanoTime();
                     runnable.run();
-                    super.eachMeasures.add(System.nanoTime() - eachStart);
+                    super.eachMeasures.offer(System.nanoTime() - eachStart);
                     super.success.increment();
                 } catch (Exception e) {
                     super.failure.increment();
@@ -73,7 +73,9 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService);
-        return super.buildFinalMeasurement();
+        // TODO 待完成.
+        // return super.buildFinalMeasurement();
+        return null;
     }
 
     /**
