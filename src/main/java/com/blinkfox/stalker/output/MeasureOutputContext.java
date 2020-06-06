@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.output;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.bean.Measurement;
+import com.blinkfox.stalker.result.StatisResult;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,10 +20,10 @@ public final class MeasureOutputContext {
      * 将测量的相关参数和统计结果等信息输出出来.
      *
      * @param options 测量的选项参数
-     * @param measurements 多种测量结果
+     * @param statisResults 多个测量统计结果
      * @return 各个输出结果的集合，v1.1.0 新增的返回结果
      */
-    public List<Object> output(Options options, Measurement... measurements) {
+    public List<Object> output(Options options, StatisResult... statisResults) {
         // 如果没有指定任何输出形式，则默认将结果输出到控制台中.
         List<MeasureOutput> outputs = options.getOutputs();
         if (outputs == null || outputs.isEmpty()) {
@@ -33,7 +33,7 @@ public final class MeasureOutputContext {
 
         // 如果有多种输出形式，就遍历得到结果，并将各个结果存入到 List 集合中.
         List<Object> results = new ArrayList<>();
-        outputs.forEach(measureOutput -> results.add(measureOutput.output(options, measurements)));
+        outputs.forEach(measureOutput -> results.add(measureOutput.output(options, statisResults)));
         return results;
     }
 

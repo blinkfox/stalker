@@ -1,8 +1,7 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.bean.OverallResult;
-import com.blinkfox.stalker.result.bean.StatisResult;
+import com.blinkfox.stalker.result.StatisResult;
 
 /**
  * 用于测量待执行方法耗时情况等信息的运行器接口.
@@ -17,9 +16,9 @@ public interface MeasureRunner {
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量的统计结果
      */
-    OverallResult run(Options options, Runnable runnable);
+    StatisResult run(Options options, Runnable runnable);
 
     /**
      * 判断当前任务是否已经执行完成.
@@ -38,6 +37,42 @@ public interface MeasureRunner {
      * @since v1.2.0
      */
     boolean isCancelled();
+
+    /**
+     * 获取当前已经运行的总次数.
+     *
+     * @return 运行总次数
+     * @author blinkfox on 2020-06-06.
+     * @since v1.2.0
+     */
+    long getTotal();
+
+    /**
+     * 获取当前测量任务已经运行的总花费时间.
+     *
+     * @return 运行总花费时间
+     * @author blinkfox on 2020-06-06.
+     * @since v1.2.0
+     */
+    long getCosts();
+
+    /**
+     * 获取到当前时的运行成功的次数.
+     *
+     * @return 运行成功的次数
+     * @author blinkfox on 2020-06-06.
+     * @since v1.2.0
+     */
+    long getSuccess();
+
+    /**
+     * 获取当前运行失败的次数.
+     *
+     * @return 运行失败的次数
+     * @author blinkfox on 2020-06-06.
+     * @since v1.2.0
+     */
+    long getFailure();
 
     /**
      * 获取任务开始运行时的纳秒时间戳.

@@ -1,8 +1,9 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,10 +35,10 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量统计结果
      */
     @Override
-    public OverallResult run(Options options, Runnable runnable) {
+    public StatisResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
         super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-measure-thread");
@@ -65,7 +66,9 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         // 阻塞调用要执行的测量任务，达到等待任务结束的目的.
         try {
             this.measureFuture.get();
-        } catch (Exception e) {
+        } catch (CancellationException e) {
+            log.info("【Stalker 提示】已取消或完成测量任务.");
+        }  catch (Exception e) {
             log.error("【Stalker 错误】执行测量任务发生错误！", e);
         }
 
@@ -73,9 +76,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService);
-        // TODO 待完成.
-        // return super.buildFinalMeasurement();
-        return null;
+        return super.getStatisResult();
     }
 
     /**

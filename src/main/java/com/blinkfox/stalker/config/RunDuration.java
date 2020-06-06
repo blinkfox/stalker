@@ -1,5 +1,6 @@
 package com.blinkfox.stalker.config;
 
+import com.blinkfox.stalker.kit.StrKit;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 
@@ -134,6 +135,16 @@ public class RunDuration {
         if (amount <= 0) {
             throw new IllegalArgumentException("【Stalker 无效参数异常】运行的续时间必须是正整数，获取到的值是：【" + amount + "】.");
         }
+    }
+
+    /**
+     * 将对象转换为字符串.
+     *
+     * @return 字符串
+     */
+    @Override
+    public String toString() {
+        return StrKit.convertTimeUnit(this.amount, this.timeUnit);
     }
 
 }

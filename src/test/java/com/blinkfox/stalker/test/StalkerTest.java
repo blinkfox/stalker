@@ -3,7 +3,7 @@ package com.blinkfox.stalker.test;
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.result.StalkerFuture;
-import com.blinkfox.stalker.result.bean.Measurement;
+import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -196,18 +196,18 @@ public class StalkerTest {
      * 测试 queryMeasurement 方法.
      */
     @Test
-    public void queryMeasurement() throws InterruptedException {
+    public void queryMeasureResult() throws InterruptedException {
         StalkerFuture stalkerFuture = Stalker.submit(() -> new MyTestService().hello());
         Assert.assertNotNull(stalkerFuture);
 
         while (!stalkerFuture.isDone()) {
-            Measurement measurement = stalkerFuture.getMeasurement();
-            Assert.assertNotNull(measurement);
+            StatisResult statisResult = stalkerFuture.getMeasureResult();
+            Assert.assertNotNull(statisResult);
             Thread.sleep(5L);
         }
 
         Assert.assertFalse(stalkerFuture.isCancelled());
-        Assert.assertNotNull(stalkerFuture.getOverallResult());
+        Assert.assertNotNull(stalkerFuture.getMeasureResult());
     }
 
     /**
@@ -222,8 +222,13 @@ public class StalkerTest {
         Thread.sleep(50L);
         List<Object> results = stalkerFuture.get();
         Assert.assertNotNull(results.get(0));
-        stalkerFuture.cancel();
-        log.info("任务已停止，获取停止前的执行结果.");
+        boolean isCancelld = stalkerFuture.cancel();
+        if (isCancelld) {
+            log.info("任务已停止，获取停止前的执行结果.");
+        } else {
+            log.info("任务停止失败.");
+        }
+
         stalkerFuture.get();
         Thread.sleep(100L);
 

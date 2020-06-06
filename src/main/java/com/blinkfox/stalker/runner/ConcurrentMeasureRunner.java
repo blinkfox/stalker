@@ -2,7 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.ConcurrentHashSet;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.Iterator;
 import java.util.Set;
@@ -40,10 +40,10 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量统计结果
      */
     @Override
-    public OverallResult run(Options options, Runnable runnable) {
+    public StatisResult run(Options options, Runnable runnable) {
         int threads = options.getThreads();
         int concurrens = options.getConcurrens();
         int runs = options.getRuns();
@@ -79,7 +79,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(this.executorService);
-        return super.buildFinalMeasurement();
+        return super.getStatisResult();
     }
 
     /**
@@ -94,7 +94,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
             try {
                 long eachStart = System.nanoTime();
                 runnable.run();
-                super.eachMeasures.add(System.nanoTime() - eachStart);
+                super.eachMeasures.offer(System.nanoTime() - eachStart);
                 super.success.increment();
             } catch (Exception e) {
                 // 如果待测量的方法，执行错误则失败数 +1,且根据选项参数来判断是否打印异常错误日志.

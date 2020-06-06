@@ -2,8 +2,6 @@ package com.blinkfox.stalker.result;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.MeasureOutputContext;
-import com.blinkfox.stalker.result.bean.Measurement;
-import com.blinkfox.stalker.result.bean.OverallResult;
 import com.blinkfox.stalker.runner.MeasureRunner;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.List;
@@ -155,7 +153,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      */
     @Override
     public List<Object> get() {
-        return new MeasureOutputContext().output(this.options, this.getMeasurement());
+        return new MeasureOutputContext().output(this.options, this.getMeasureResult());
     }
 
     /**
@@ -175,21 +173,21 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     }
 
     /**
-     * 实时获取运行中的任务的总体测量结果信息.
+     * 实时获取任务的测量头统计结果.
      *
-     * @return 总体测量结果 {@link OverallResult} 信息
+     * @return {@link StatisResult} 结果
      */
-    public OverallResult getOverallResult() {
-        return this.measureRunner.buildRunningMeasurement();
+    public StatisResult getMeasureResult() {
+        return this.measureRunner.getStatisResult();
     }
 
     /**
-     * 实时获取任务的执行结果.
+     * 获取任务最终完成时实际所消耗的总的纳秒时间数.
      *
-     * @return {@link Measurement} 结果
+     * @return 实际所消耗的总的纳秒时间数
      */
-    public Measurement getMeasurement() {
-        return new MeasurementCollector().collect(this.measureRunner.buildRunningMeasurement());
+    public long getCosts() {
+        return this.measureRunner.getCosts();
     }
 
     /**
@@ -235,15 +233,6 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      */
     public long getEndNanoTime() {
         return this.measureRunner.getEndNanoTime();
-    }
-
-    /**
-     * 获取任务最终完成时实际所消耗的总的纳秒时间数.
-     *
-     * @return 实际所消耗的总的纳秒时间数
-     */
-    public long getCosts() {
-        return this.measureRunner.getCosts();
     }
 
 }

@@ -1,6 +1,6 @@
 package com.blinkfox.stalker.test.result.bean;
 
-import com.blinkfox.stalker.result.bean.StatisResult;
+import com.blinkfox.stalker.result.StatisResult;
 import org.junit.Assert;
 import org.junit.Test;
 

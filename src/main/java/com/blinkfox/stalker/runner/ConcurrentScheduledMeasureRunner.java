@@ -2,7 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.RunDuration;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -48,10 +48,10 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量统计结果
      */
     @Override
-    public OverallResult run(Options options, Runnable runnable) {
+    public StatisResult run(Options options, Runnable runnable) {
         int concurrens = options.getConcurrens();
         int runs = options.getRuns();
         boolean printErrorLog = options.isPrintErrorLog();
@@ -98,7 +98,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         if (!this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }
-        return super.buildFinalMeasurement();
+        return super.getStatisResult();
     }
 
     /**

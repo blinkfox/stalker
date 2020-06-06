@@ -3,6 +3,7 @@ package com.blinkfox.stalker.kit;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -75,6 +76,34 @@ public class StrKit {
             return roundToString(d / 36e11, "h");
         } else {
             return roundToString(d / 864e11, "d");
+        }
+    }
+
+    /**
+     * 将纳秒的时间转为与其最贴近的时间单位.
+     *
+     * @param amount 数量
+     * @param timeUnit 时间单位
+     * @return 其他单位的时间字符串
+     */
+    public String convertTimeUnit(long amount, TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case NANOSECONDS :
+                return amount + " ns";
+            case MICROSECONDS :
+                return amount + " μs";
+            case MILLISECONDS :
+                return amount + " ms";
+            case SECONDS:
+                return amount + " s";
+            case MINUTES:
+                return amount + " m";
+            case HOURS:
+                return amount + " h";
+            case DAYS:
+                return amount + " d";
+            default :
+                return String.valueOf(amount);
         }
     }
 

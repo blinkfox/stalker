@@ -2,8 +2,9 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.RunDuration;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +39,14 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
     }
 
     /**
-     * 持续执行指定时间的 runnable 方法，并将执行成功与否、耗时结果等信息存入到 OverallResult 实体对象中.
+     * 持续执行指定时间的 runnable 方法，并将执行成功与否、耗时结果等信息存入到 {@link StatisResult} 实体对象中.
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量统计结果
      */
     @Override
-    public OverallResult run(Options options, Runnable runnable) {
+    public StatisResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-scheduled-measure-thread");
         super.startNanoTime = System.nanoTime();
@@ -57,7 +58,7 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
                     // 开始执行测量任务，记录开始时间、执行次数等.
                     long eachStart = System.nanoTime();
                     runnable.run();
-                    super.eachMeasures.add(System.nanoTime() - eachStart);
+                    super.eachMeasures.offer(System.nanoTime() - eachStart);
                     super.success.increment();
                 } catch (Exception e) {
                     super.failure.increment();
@@ -79,6 +80,8 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         // 阻塞调用要执行的测量任务，达到阻塞等待任务结束的目的.
         try {
             this.measureFuture.get();
+        } catch (CancellationException e) {
+            log.info("【Stalker 提示】已取消或完成指定运行时间的测量任务.");
         } catch (Exception e) {
             log.error("【Stalker 错误】执行测量任务发生错误！", e);
         }
@@ -87,7 +90,7 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService, this.scheduledExecutorService);
-        return super.buildFinalMeasurement();
+        return super.getStatisResult();
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.output;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.bean.Measurement;
+import com.blinkfox.stalker.result.StatisResult;
 
 /**
  * 将最终的测量统计结果输出出来.
@@ -18,6 +18,6 @@ public interface MeasureOutput {
      * @param measurements 多种测量结果
      * @return 输出结果
      */
-    Object output(Options options, Measurement... measurements);
+    Object output(Options options, StatisResult... measurements);
 
 }
