@@ -2,6 +2,7 @@ package com.blinkfox.stalker.result;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.ScheduledUpdater;
+import com.blinkfox.stalker.kit.StrKit;
 import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.runner.MeasureRunner;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
@@ -77,9 +78,16 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         ScheduledUpdater scheduledUpdater = options.getScheduledUpdater();
         if (scheduledUpdater != null && scheduledUpdater.isEnabled()) {
             this.scheduledUpdateExecutor = StalkerExecutors.newScheduledThreadPool(1, "scheduled-update-thread");
-            this.scheduledUpdateFuture = this.scheduledUpdateExecutor.scheduleWithFixedDelay(
-                    this.measureRunner::getStatisResult,
-                    scheduledUpdater.getInitialDelay(), scheduledUpdater.getDelay(), scheduledUpdater.getTimeUnit());
+
+            final long delay = scheduledUpdater.getDelay();
+            final TimeUnit timeUnit = scheduledUpdater.getTimeUnit();
+            this.scheduledUpdateFuture = this.scheduledUpdateExecutor.scheduleWithFixedDelay(() -> {
+                if (log.isDebugEnabled()) {
+                    log.debug("【Stalker 提示】开始了每隔【{}】执行一次定时更新统计数据的定时任务.", StrKit.convertTimeUnit(delay, timeUnit));
+                }
+                this.measureRunner.getStatisResult();
+            },
+            scheduledUpdater.getInitialDelay(), delay, timeUnit);
         }
     }
 
@@ -152,6 +160,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         if (this.scheduledUpdateFuture != null && !this.scheduledUpdateFuture.isDone()) {
             this.scheduledUpdateFuture.cancel(false);
         }
+        log.debug("【Stalker 提示】已关闭停止了相关的线程池或异步任务.");
     }
 
     /**
@@ -271,7 +280,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     /**
      * 获取任务结束运行时的纳秒时间戳，如果任务还未结束，该值将是 {@code 0}.
      *
-     * @return 结束时纳秒时间戳
+     * @return 结束时纳秒时间戳MeasureStatistician
      */
     public long getEndNanoTime() {
         return this.measureRunner.getEndNanoTime();

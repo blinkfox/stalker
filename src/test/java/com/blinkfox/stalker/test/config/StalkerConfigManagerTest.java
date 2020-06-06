@@ -21,7 +21,7 @@ public class StalkerConfigManagerTest {
         Assert.assertNotNull(stalkerConfigManager);
 
         Options options = stalkerConfigManager.getDefaultOptions();
-        Assert.assertEquals(10, options.getRuns());
+        Assert.assertEquals(1, options.getRuns());
 
         options.named("test");
         stalkerConfigManager.reLoadOptions(options);

@@ -54,25 +54,12 @@ public class ScheduledUpdater {
      * @param initialDelay 初始延迟执行时间
      * @param delay 定时执行的时间间隔
      * @param timeUnit 时间单位
+     * @return {@link ScheduledUpdater} 实例
      */
     public static ScheduledUpdater of(boolean enabled, long initialDelay, long delay, TimeUnit timeUnit) {
         checkDelay(initialDelay);
         checkParams(delay, timeUnit);
         return new ScheduledUpdater(enabled, initialDelay, delay, timeUnit);
-    }
-
-    /**
-     * 构造启用和其他默认参数 {@link ScheduledUpdater} 实例的构造方法.
-     */
-    public static ScheduledUpdater ofEnable() {
-        return new ScheduledUpdater(true, 5, 5, TimeUnit.SECONDS);
-    }
-
-    /**
-     * 构造禁用和其他默认参数 {@link ScheduledUpdater} 实例的构造方法.
-     */
-    public static ScheduledUpdater ofDisable() {
-        return new ScheduledUpdater(false, 5, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -110,6 +97,24 @@ public class ScheduledUpdater {
     }
 
     /**
+     * 构造启用和其他默认参数 {@link ScheduledUpdater} 实例的构造方法.
+     *
+     * @return {@link ScheduledUpdater} 实例
+     */
+    public static ScheduledUpdater ofEnable() {
+        return new ScheduledUpdater(true, 5, 5, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 构造禁用和其他默认参数 {@link ScheduledUpdater} 实例的构造方法.
+     *
+     * @return {@link ScheduledUpdater} 实例
+     */
+    public static ScheduledUpdater ofDisable() {
+        return new ScheduledUpdater(false, 5, 5, TimeUnit.SECONDS);
+    }
+
+    /**
      * 启用定时任务.
      *
      * @return 当前 {@link ScheduledUpdater} 实例对象
@@ -122,13 +127,16 @@ public class ScheduledUpdater {
     /**
      * 禁用定时任务.
      *
-     * 当前 {@link ScheduledUpdater} 实例对象
+     * @return 当前 {@link ScheduledUpdater} 实例对象
      */
     public ScheduledUpdater disable() {
         this.enabled = false;
         return this;
     }
 
+    /**
+     * 校验属性信息是否合法.
+     */
     public void valid() {
         checkDelay(initialDelay);
         checkParams(delay, timeUnit);

@@ -97,6 +97,7 @@ public class MeasureStatistician extends StatisResult {
      * @param currFailure 当前累计的失败运行次数
      * @param currCosts 当前累计的总的运行时间
      * @param currEachCosts 从上次更新到本次更新期间的每次运行次数的花费时间
+     * @return {@link StatisResult} 测量出的统计结果信息
      */
     public StatisResult updateAndGet(long currSuccess, long currFailure, long currCosts, List<Long> currEachCosts) {
         this.update(currSuccess, currFailure, currCosts, currEachCosts);
