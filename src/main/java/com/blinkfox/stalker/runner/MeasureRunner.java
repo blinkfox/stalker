@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 
 /**
  * 用于测量待执行方法耗时情况等信息的运行器接口.
@@ -18,7 +18,7 @@ public interface MeasureRunner {
      * @param runnable 可运行实例
      * @return 测量的统计结果
      */
-    StatisResult run(Options options, Runnable runnable);
+    MeasureResult run(Options options, Runnable runnable);
 
     /**
      * 判断当前任务是否已经执行完成.
@@ -101,12 +101,12 @@ public interface MeasureRunner {
     void stop();
 
     /**
-     * 获取运行中的任务的统计结果信息.
+     * 获取运行中的任务的测量统计结果信息.
      *
      * @return 统计结果信息
      * @author blinkfox on 2020-06-05.
      * @since v1.2.0
      */
-    StatisResult getStatisResult();
+    MeasureResult getMeasureResult();
 
 }

@@ -3,7 +3,7 @@ package com.blinkfox.stalker.output;
 import com.blinkfox.minitable.MiniTable;
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.StrKit;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -36,12 +36,12 @@ public class OutputConsole implements MeasureOutput {
      * 将测量的相关参数和统计结果等信息输出出来.
      *
      * @param options 测量的选项参数
-     * @param measurements 多种测量结果
+     * @param measureResults 多个测量统计结果的不定集合
      */
     @Override
-    public Object output(Options options, StatisResult... measurements) {
+    public Object output(Options options, MeasureResult... measureResults) {
         // 渲染并打印结果.
-        String result = this.getRenderResult(options, measurements);
+        String result = this.getRenderResult(options, measureResults);
         log.warn("\n{}", result);
         return result;
     }
@@ -50,12 +50,12 @@ public class OutputConsole implements MeasureOutput {
      * 获取最终需要渲染的结果.
      *
      * @param options 测量运行的相关选项参数
-     * @param measureResults 多个测量结果的不定集合
+     * @param measureResults 多个测量统计结果的不定集合
      * @return 结果字符串
      */
-    private String getRenderResult(Options options, StatisResult... measureResults) {
+    private String getRenderResult(Options options, MeasureResult... measureResults) {
         if (options == null || measureResults == null) {
-            throw new IllegalArgumentException("options or measureStatisResult is null.");
+            throw new IllegalArgumentException("options or measureResult is null.");
         }
 
         // 根据options的值, 拼接title.
@@ -75,7 +75,7 @@ public class OutputConsole implements MeasureOutput {
         // 拼接各个测量结果的字符串表头和内容.
         MiniTable table = new MiniTable(title).addHeaders(HEADERS);
         for (int i = 0, len = measureResults.length; i < len; i++) {
-            StatisResult result = measureResults[i];
+            MeasureResult result = measureResults[i];
             table.addDatas(i + 1, result.getEasyReadCosts(),
                     result.getTotal(), result.getSuccess(), result.getFailure(), result.getEasyReadThroughput(),
                     result.getEasyReadSum(), result.getEasyReadAvg(), result.getEasyReadMin(), result.getEasyReadMax(),

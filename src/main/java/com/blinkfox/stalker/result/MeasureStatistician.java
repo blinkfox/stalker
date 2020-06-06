@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 针对测量出的消耗时间数据进行统计的统计器类，一些通用属性信息集成自 {@link StatisResult}.
+ * 针对测量出的消耗时间数据进行统计的统计器类，一些通用属性信息集成自 {@link MeasureResult}.
  *
  * @author blinkfox on 2020-06-05.
+ * @see MeasureResult
  * @since v1.2.0
  */
-public class MeasureStatistician extends StatisResult {
+public class MeasureStatistician extends MeasureResult {
 
     /**
      * 95% 置信区间的 Z 值.
@@ -97,9 +98,9 @@ public class MeasureStatistician extends StatisResult {
      * @param currFailure 当前累计的失败运行次数
      * @param currCosts 当前累计的总的运行时间
      * @param currEachCosts 从上次更新到本次更新期间的每次运行次数的花费时间
-     * @return {@link StatisResult} 测量出的统计结果信息
+     * @return {@link MeasureResult} 测量出的统计结果信息
      */
-    public StatisResult updateAndGet(long currSuccess, long currFailure, long currCosts, List<Long> currEachCosts) {
+    public MeasureResult updateAndGet(long currSuccess, long currFailure, long currCosts, List<Long> currEachCosts) {
         this.update(currSuccess, currFailure, currCosts, currEachCosts);
         return this.get();
     }
@@ -111,21 +112,20 @@ public class MeasureStatistician extends StatisResult {
      *
      * @return 统计结果信息
      */
-    public StatisResult get() {
-        StatisResult statisResult = new StatisResult();
-        statisResult.setCosts(super.costs);
-        statisResult.setTotal(super.total);
-        statisResult.setSuccess(super.success);
-        statisResult.setFailure(super.failure);
-        statisResult.setThroughput(super.throughput);
-        statisResult.setSum(super.sum);
-        statisResult.setAvg(super.avg);
-        statisResult.setMin(super.min);
-        statisResult.setMax(super.max);
-        statisResult.setStdDev(super.stdDev);
-        statisResult.setLowerConfidence(super.lowerConfidence);
-        statisResult.setUpperConfidence(super.upperConfidence);
-        return statisResult;
+    public MeasureResult get() {
+        return new MeasureResult()
+                .setCosts(super.costs)
+                .setTotal(super.total)
+                .setSuccess(super.success)
+                .setFailure(super.failure)
+                .setThroughput(super.throughput)
+                .setSum(super.sum)
+                .setAvg(super.avg)
+                .setMin(super.min)
+                .setMax(super.max)
+                .setStdDev(super.stdDev)
+                .setLowerConfidence(super.lowerConfidence)
+                .setUpperConfidence(super.upperConfidence);
     }
 
 }

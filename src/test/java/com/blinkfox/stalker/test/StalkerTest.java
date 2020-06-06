@@ -2,8 +2,8 @@ package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.result.StalkerFuture;
-import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.test.prepare.MyTestService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -201,8 +201,8 @@ public class StalkerTest {
         Assert.assertNotNull(stalkerFuture);
 
         while (!stalkerFuture.isDone()) {
-            StatisResult statisResult = stalkerFuture.getMeasureResult();
-            Assert.assertNotNull(statisResult);
+            MeasureResult measureResult = stalkerFuture.getMeasureResult();
+            Assert.assertNotNull(measureResult);
             Thread.sleep(5L);
         }
 
@@ -241,7 +241,7 @@ public class StalkerTest {
      */
     @Test
     public void submitWithDuration() throws InterruptedException {
-        StalkerFuture stalkerFuture = Stalker.submit(Options.ofDurationSeconds(20, 5),
+        StalkerFuture stalkerFuture = Stalker.submit(Options.ofDurationSeconds(15, 5),
                 () -> new MyTestService().slowHello());
         Assert.assertNotNull(stalkerFuture);
         Assert.assertEquals(0, stalkerFuture.getEndNanoTime());

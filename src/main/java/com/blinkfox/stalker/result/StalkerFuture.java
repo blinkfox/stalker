@@ -85,7 +85,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
                 if (log.isDebugEnabled()) {
                     log.debug("【Stalker 提示】开始了每隔【{}】执行一次定时更新统计数据的定时任务.", StrKit.convertTimeUnit(delay, timeUnit));
                 }
-                this.measureRunner.getStatisResult();
+                this.measureRunner.getMeasureResult();
             },
             scheduledUpdater.getInitialDelay(), delay, timeUnit);
         }
@@ -226,10 +226,10 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     /**
      * 实时获取任务的测量头统计结果.
      *
-     * @return {@link StatisResult} 结果
+     * @return {@link MeasureResult} 结果
      */
-    public StatisResult getMeasureResult() {
-        return this.measureRunner.getStatisResult();
+    public MeasureResult getMeasureResult() {
+        return this.measureRunner.getMeasureResult();
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.runner;
 
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.result.MeasureStatistician;
-import com.blinkfox.stalker.result.StatisResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -173,10 +173,10 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      * @return 统计结果信息
      */
     @Override
-    public StatisResult getStatisResult() {
+    public MeasureResult getMeasureResult() {
         return this.completed.get() && this.getTotal() <= this.beforeTotalCount && eachMeasures.isEmpty()
                 ? this.measureStatistician.get()
-                : this.getRunningStatisResult();
+                : this.getRunningMeasureResult();
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class AbstractMeasureRunner implements MeasureRunner {
      *
      * @return 统计结果信息
      */
-    private StatisResult getRunningStatisResult() {
+    private MeasureResult getRunningMeasureResult() {
         try {
             // 读取时加锁.
             statisLock.lockInterruptibly();

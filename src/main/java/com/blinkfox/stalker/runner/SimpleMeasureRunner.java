@@ -1,7 +1,7 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
@@ -38,7 +38,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
      * @return 测量统计结果
      */
     @Override
-    public StatisResult run(Options options, Runnable runnable) {
+    public MeasureResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
         super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-measure-thread");
@@ -76,7 +76,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService);
-        return super.getStatisResult();
+        return super.getMeasureResult();
     }
 
     /**

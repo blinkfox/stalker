@@ -3,16 +3,19 @@ package com.blinkfox.stalker.result;
 import com.blinkfox.stalker.kit.StrKit;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
- * 对测量的耗时时间等信息做统计分析后的统计结果实体类.
+ * 对测量的耗时时间等信息做统计分析后的测量统计结果实体类.
  *
  * @author blinkfox on 2019-01-05.
- * @since v1.0.0
+ * @see MeasureStatistician
+ * @since v1.2.0
  */
 @Getter
 @Setter
-public class StatisResult {
+@Accessors(chain = true)
+public class MeasureResult {
 
     /**
      * 测量代码在执行过程中所消耗的总耗时，单位为纳秒(ns).
@@ -164,7 +167,7 @@ public class StatisResult {
      */
     @Override
     public String toString() {
-        return StrKit.join("MeasureStatisResult = {",
+        return StrKit.join("MeasureResult = {",
                 ", costs = ", this.getEasyReadCosts(),
                 ", total = ", this.getTotal(),
                 ", success = ", this.getSuccess(),

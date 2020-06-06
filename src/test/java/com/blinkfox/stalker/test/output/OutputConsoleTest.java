@@ -2,7 +2,7 @@ package com.blinkfox.stalker.test.output;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.OutputConsole;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 import org.junit.Test;
 
 /**
@@ -18,7 +18,7 @@ public class OutputConsoleTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void outputWithNullOptions() {
-        new OutputConsole().output(null, new StatisResult());
+        new OutputConsole().output(null, new MeasureResult());
     }
 
     /**

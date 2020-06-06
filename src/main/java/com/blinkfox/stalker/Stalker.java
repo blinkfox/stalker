@@ -2,8 +2,8 @@ package com.blinkfox.stalker;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.output.MeasureOutputContext;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.result.StalkerFuture;
-import com.blinkfox.stalker.result.StatisResult;
 import com.blinkfox.stalker.runner.MeasureRunnerContext;
 import java.util.List;
 import lombok.experimental.UtilityClass;
@@ -81,14 +81,14 @@ public class Stalker {
      * @author blinkfox on 2020-05-14
      * @since v1.1.0
      */
-    public StatisResult[] runStatis(Options options, Runnable... runnables) {
+    public MeasureResult[] runStatis(Options options, Runnable... runnables) {
         int len;
         if (options == null || runnables == null || (len = runnables.length) == 0) {
             throw new IllegalArgumentException("【Stalker 参数异常】options or runnables is null (or empty)!");
         }
 
         // 循环遍历测量各个 Runnable 实例的性能结果，然后将各个结果存放到数组中，最后统一输出出来.
-        StatisResult[] measurements = new StatisResult[len];
+        MeasureResult[] measurements = new MeasureResult[len];
         for (int i = 0; i < len; i++) {
             measurements[i] = new MeasureRunnerContext(options).run(runnables[i]);
         }

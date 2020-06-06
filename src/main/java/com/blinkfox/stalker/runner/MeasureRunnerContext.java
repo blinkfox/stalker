@@ -2,8 +2,8 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.StrKit;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.result.StalkerFuture;
-import com.blinkfox.stalker.result.StatisResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -64,7 +64,7 @@ public final class MeasureRunnerContext {
      * @param runnable 可运行实例
      * @return 运行的测量统计结果信息
      */
-    public StatisResult run(Runnable runnable) {
+    public MeasureResult run(Runnable runnable) {
         warmup(options, runnable);
         if (options.getDuration() != null) {
             return options.getConcurrens() > 1

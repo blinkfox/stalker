@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * {@link ScheduledUpdater} 的单元测试类
+ * {@link ScheduledUpdater} 的单元测试类.
  *
  * @author blinkfox on 2020-06-06.
  * @since v1.2.0

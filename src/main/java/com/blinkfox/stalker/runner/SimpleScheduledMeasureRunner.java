@@ -2,7 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.config.RunDuration;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
@@ -39,14 +39,14 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
     }
 
     /**
-     * 持续执行指定时间的 runnable 方法，并将执行成功与否、耗时结果等信息存入到 {@link StatisResult} 实体对象中.
+     * 持续执行指定时间的 runnable 方法，并将执行成功与否、耗时结果等信息存入到 {@link MeasureResult} 实体对象中.
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
      * @return 测量统计结果
      */
     @Override
-    public StatisResult run(Options options, Runnable runnable) {
+    public MeasureResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-scheduled-measure-thread");
         super.startNanoTime = System.nanoTime();
@@ -90,7 +90,7 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(super.executorService, this.scheduledExecutorService);
-        return super.getStatisResult();
+        return super.getMeasureResult();
     }
 
     /**

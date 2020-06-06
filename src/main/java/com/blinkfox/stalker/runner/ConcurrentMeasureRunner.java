@@ -2,7 +2,7 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.ConcurrentHashSet;
-import com.blinkfox.stalker.result.StatisResult;
+import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
 import java.util.Iterator;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
      * @return 测量统计结果
      */
     @Override
-    public StatisResult run(Options options, Runnable runnable) {
+    public MeasureResult run(Options options, Runnable runnable) {
         int threads = options.getThreads();
         int concurrens = options.getConcurrens();
         int runs = options.getRuns();
@@ -61,7 +61,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
                 semaphore.acquire();
                 // 如果线程池已经关闭，就直接返回结果.
                 if (super.executorService.isShutdown()) {
-                    return super.getStatisResult();
+                    return super.getMeasureResult();
                 }
 
                 final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
@@ -84,7 +84,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
         StalkerExecutors.shutdown(this.executorService);
-        return super.getStatisResult();
+        return super.getMeasureResult();
     }
 
     /**

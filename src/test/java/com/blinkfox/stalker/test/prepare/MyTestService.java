@@ -29,7 +29,7 @@ public class MyTestService {
      * 测试方法2，模拟业务代码耗时 2 ms.
      */
     public void fastHello() {
-        this.sleep(2L);
+        this.sleep(1L);
     }
 
     /**
