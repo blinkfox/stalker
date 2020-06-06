@@ -222,8 +222,8 @@ public class StalkerTest {
         Thread.sleep(50L);
         List<Object> results = stalkerFuture.get();
         Assert.assertNotNull(results.get(0));
-        boolean isCancelld = stalkerFuture.cancel();
-        if (isCancelld) {
+        boolean isCancelled = stalkerFuture.cancel();
+        if (isCancelled) {
             log.info("任务已停止，获取停止前的执行结果.");
         } else {
             log.info("任务停止失败.");

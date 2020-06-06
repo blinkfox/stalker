@@ -73,6 +73,10 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         while (true) {
             try {
                 semaphore.acquire();
+                if (super.executorService.isShutdown()) {
+                    return super.getStatisResult();
+                }
+
                 // 如果当前时间大于了期望的结束时间，就跳出 while 循环.
                 if (System.nanoTime() > expectEndNanoTime) {
                     break;

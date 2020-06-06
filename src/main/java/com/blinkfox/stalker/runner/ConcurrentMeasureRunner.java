@@ -59,6 +59,11 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         for (int i = 0; i < threads; i++) {
             try {
                 semaphore.acquire();
+                // 如果线程池已经关闭，就直接返回结果.
+                if (super.executorService.isShutdown()) {
+                    return super.getStatisResult();
+                }
+
                 final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     this.loopMeasure(runs, printErrorLog, runnable);
                     semaphore.release();
