@@ -1,6 +1,7 @@
 package com.blinkfox.stalker.result;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.config.ScheduledUpdater;
 import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.runner.MeasureRunner;
 import com.blinkfox.stalker.runner.executor.StalkerExecutors;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,11 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      */
     private static final ExecutorService executor =
             StalkerExecutors.newThreadExecutor(4, 16, "stalker-future-thread");
+
+    /**
+     * 用于异步定时更新统计数据的线程池.
+     */
+    private ScheduledExecutorService scheduledUpdateExecutor;
 
     /**
      * 可运行任务的选项参数信息.
@@ -49,6 +57,11 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     private CompletableFuture<Void> runFuture;
 
     /**
+     * 定时更新同步数据的 {@link ScheduledFuture} 对象.
+     */
+    private ScheduledFuture<?> scheduledUpdateFuture;
+
+    /**
      * 构造方法.
      *
      * @param options 运行任务的选项参数
@@ -59,6 +72,15 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         this.options = options;
         this.runnable = runnable;
         this.measureRunner = measureRunner;
+
+        // 如果启用了定时更新统计数据的任务，就构造定时任务线程池，并开启异步定时获取统计数据的任务.
+        ScheduledUpdater scheduledUpdater = options.getScheduledUpdater();
+        if (scheduledUpdater != null && scheduledUpdater.isEnabled()) {
+            this.scheduledUpdateExecutor = StalkerExecutors.newScheduledThreadPool(1, "scheduled-update-thread");
+            this.scheduledUpdateFuture = this.scheduledUpdateExecutor.scheduleWithFixedDelay(
+                    this.measureRunner::getStatisResult,
+                    scheduledUpdater.getInitialDelay(), scheduledUpdater.getDelay(), scheduledUpdater.getTimeUnit());
+        }
     }
 
     /**
@@ -73,8 +95,12 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
 
         synchronized (this) {
             if (this.runFuture == null) {
+                // 开始异步运行测量任务.
                 this.runFuture = CompletableFuture.runAsync(
                         () -> this.measureRunner.run(this.options, this.runnable), executor);
+
+                // 当任务完成之后，如果有其他异步任务没完成或关闭，就关闭相关的异步任务.
+                this.runFuture.whenComplete((a, e) -> stopFutures());
             }
         }
     }
@@ -105,11 +131,27 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
             flag = false;
         }
 
-        // 需要将本 Future 中的任务也停止.
+        // 需要将本 Future 中的相关任务或线程也停止.
+        this.stopFutures();
+        return flag;
+    }
+
+    /**
+     * 如果某些任务还没完成或者没关闭，就停止相关的任务信息.
+     */
+    private void stopFutures() {
+        // 立即停止当前异步测量线程任务.
         if (this.runFuture != null && !this.runFuture.isDone()) {
             this.runFuture.cancel(true);
         }
-        return flag;
+
+        // 如果线程池未关闭，就关闭线程池，注意，这里不要理解关闭和立即终止正在运行中的任务，防止最后的统计数据更新异常.
+        if (this.scheduledUpdateExecutor != null && !this.scheduledUpdateExecutor.isShutdown()) {
+            this.scheduledUpdateExecutor.shutdown();
+        }
+        if (this.scheduledUpdateFuture != null && !this.scheduledUpdateFuture.isDone()) {
+            this.scheduledUpdateFuture.cancel(false);
+        }
     }
 
     /**

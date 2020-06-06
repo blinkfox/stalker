@@ -64,6 +64,11 @@ public class Options {
     private String message;
 
     /**
+     * 用于定时更新统计数据的定时更新器，通常在调用 {@code Stalker.submit} 的异步执行任务时才设置并开启此配置项，默认是空值.
+     */
+    private ScheduledUpdater scheduledUpdater;
+
+    /**
      * 根据'执行次数'来构建Options实例.
      *
      * @return Options实例
@@ -376,6 +381,43 @@ public class Options {
      */
     public Options outputs(List<MeasureOutput> outputs) {
         this.outputs = outputs;
+        return this;
+    }
+
+    /**
+     * 设置默认的定时统计数据更新任务的配置选项，默认是 10 秒.
+     *
+     * @return 本 {@link Options} 实例
+     */
+    public Options enableScheduledUpdater() {
+        ScheduledUpdater updater = StalkerConfigManager.getInstance().getDefaultScheduledUpdater();
+        this.scheduledUpdater = ScheduledUpdater.of(true, updater.getInitialDelay(),
+                updater.getDelay(), updater.getTimeUnit());
+        return this;
+    }
+
+    /**
+     * 设置默认的定时统计数据更新任务的配置选项.
+     *
+     * @param delay 时间间隔
+     * @param timeUnit 时间单位
+     * @return 本 {@link Options} 实例
+     */
+    public Options enableScheduledUpdater(long delay, TimeUnit timeUnit) {
+        this.scheduledUpdater = ScheduledUpdater.of(delay, timeUnit);
+        return this;
+    }
+
+    /**
+     * 设置默认的定时统计数据更新任务的配置选项.
+     *
+     * @param initialDelay 第一次的延迟执行时间
+     * @param delay 时间间隔
+     * @param timeUnit 时间单位
+     * @return 本 {@link Options} 实例
+     */
+    public Options enableScheduledUpdater(long initialDelay, long delay, TimeUnit timeUnit) {
+        this.scheduledUpdater = ScheduledUpdater.of(true, initialDelay, delay, timeUnit);
         return this;
     }
 

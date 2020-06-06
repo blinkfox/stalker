@@ -18,7 +18,7 @@ import lombok.experimental.UtilityClass;
 public class Stalker {
 
     /**
-     * 使用默认选项参数来提交可运行的测量任务，并立即返回此次会话的 ID.
+     * 使用默认选项参数来提交可运行的异步测量任务，并立即返回此次异步任务的 {@link StalkerFuture} 实例.
      *
      * @param task 任务
      * @return {@link StalkerFuture} 对象实例
@@ -30,7 +30,9 @@ public class Stalker {
     }
 
     /**
-     * 提交可运行的测量任务，并立即返回此次会话的 ID.
+     * 提交可运行的异步测量任务，并立即返回此次异步任务的 {@link StalkerFuture} 实例.
+     *
+     * <p>异步提交任务时，将默认额外开启定时更新统计数据的定时任务.</p>
      *
      * @param options 选项参数
      * @param task 任务
@@ -43,6 +45,9 @@ public class Stalker {
             throw new IllegalArgumentException("options or runnables is null (or empty)!");
         }
         options.valid();
+
+        // 异步提交任务时，将默认额外开启定时更新统计数据的定时任务.
+        options.enableScheduledUpdater();
         return MeasureRunnerContext.submit(options, task);
     }
 

@@ -236,4 +236,26 @@ public class StalkerTest {
         stalkerFuture.get();
     }
 
+    /**
+     * 测试慢方法的执行情况.
+     */
+    @Test
+    public void submitWithDuration() throws InterruptedException {
+        StalkerFuture stalkerFuture = Stalker.submit(Options.ofDurationSeconds(20, 5),
+                () -> new MyTestService().slowHello());
+        Assert.assertNotNull(stalkerFuture);
+        Assert.assertEquals(0, stalkerFuture.getEndNanoTime());
+
+        while (!stalkerFuture.isDone()) {
+            Thread.sleep(5000L);
+        }
+
+        log.info("任务已完成，获取最后的执行结果，并获取最终结果信息.");
+        stalkerFuture.get();
+        Assert.assertTrue(stalkerFuture.getStartNanoTime() > 0);
+        Assert.assertTrue(stalkerFuture.isDoneSuccessfully());
+        Assert.assertEquals(stalkerFuture.getTotal(), stalkerFuture.getSuccess() + stalkerFuture.getFailure());
+        Assert.assertTrue(stalkerFuture.getCosts() > 0);
+    }
+
 }
