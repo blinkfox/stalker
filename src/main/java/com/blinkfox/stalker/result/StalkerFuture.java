@@ -204,7 +204,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      * 请注意，该方法获取结果时是“非阻塞的”，每次都能获取到正在执行中的任务进度结果，即时任务被取消也能获取到取消时的最终结果信息。
      * 所以，你不应该调用此方法来阻塞等待执行结果.
      *
-     * @return {@link Options#getOutputs()}  中定义多种的输出通道结果
+     * @return {@code Options.getOutputs()}  中定义多种的输出通道结果
      */
     @Override
     public List<Object> get() {
@@ -220,7 +220,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      *
      * @param timeout 超时时间
      * @param unit 超时时间单位
-     * @return {@link Options#getOutputs()}  中定义多种的输出通道结果
+     * @return {@code Options.getOutputs()}  中定义多种的输出通道结果
      */
     @Override
     public List<Object> get(long timeout, TimeUnit unit) {
