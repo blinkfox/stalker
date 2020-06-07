@@ -20,7 +20,7 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
