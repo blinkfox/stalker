@@ -130,6 +130,10 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      */
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
+        if (this.isCancelled()) {
+            return true;
+        }
+
         // 使用布尔值记录，核心任务是否运行完成.
         boolean flag = true;
         try {

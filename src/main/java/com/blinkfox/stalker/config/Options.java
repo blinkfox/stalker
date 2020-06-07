@@ -133,6 +133,7 @@ public class Options {
         Options options = of();
         options.threads = threads;
         options.concurrens = concurrens;
+        options.runs = 1;
         return options;
     }
 

@@ -154,7 +154,7 @@ public class StalkerTest {
      */
     @Test
     public void submitWithSlowMethod() throws InterruptedException {
-        StalkerFuture stalkerFuture = Stalker.submit(Options.of("SlowTest", 20, 5, 1),
+        StalkerFuture stalkerFuture = Stalker.submit(Options.of("SlowTest", 20, 5),
                 () -> new MyTestService().slowHello());
         Assert.assertNotNull(stalkerFuture);
 
@@ -164,7 +164,7 @@ public class StalkerTest {
             Thread.sleep(50L);
         }
 
-        log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
+        log.info("任务已完成，获取最后的执行结果.");
         stalkerFuture.get();
     }
 
@@ -181,7 +181,7 @@ public class StalkerTest {
         while (!stalkerFuture.isDone()) {
             List<Object> results = stalkerFuture.get();
             Assert.assertNotNull(results.get(0));
-            Thread.sleep(500L);
+            Thread.sleep(1000L);
         }
 
         log.info("任务已完成，获取最后的执行结果，并移除任务记录.");
@@ -250,7 +250,7 @@ public class StalkerTest {
             Thread.sleep(5000L);
         }
 
-        log.info("任务已完成，获取最后的执行结果，并获取最终结果信息.");
+        log.info("任务已完成，获取最终的执行结果信息.");
         stalkerFuture.get();
         Assert.assertTrue(stalkerFuture.getStartNanoTime() > 0);
         Assert.assertTrue(stalkerFuture.isDoneSuccessfully());
