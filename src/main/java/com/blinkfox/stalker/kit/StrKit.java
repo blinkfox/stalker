@@ -2,7 +2,10 @@ package com.blinkfox.stalker.kit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  * 字符串操作工具类.
@@ -28,6 +31,8 @@ public class StrKit {
      *
      * @param objects 不定参数对象
      * @return 字符串
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
      */
     public String join(Object... objects) {
         if (objects != null && objects.length > 0) {
@@ -37,8 +42,18 @@ public class StrKit {
             }
             return sb.toString();
         }
-
         return "";
+    }
+
+    /**
+     * 使用 Slf4j 中的字符串格式化方式来格式化字符串.
+     *
+     * @param pattern 待格式化的字符串
+     * @param args 参数
+     * @return 格式化后的字符串
+     */
+    public String format(String pattern, Object... args) {
+        return pattern == null ? "" : MessageFormatter.arrayFormat(pattern, args).getMessage();
     }
 
     /**
@@ -65,6 +80,34 @@ public class StrKit {
     }
 
     /**
+     * 将纳秒的时间转为与其最贴近的时间单位.
+     *
+     * @param amount 数量
+     * @param timeUnit 时间单位
+     * @return 其他单位的时间字符串
+     */
+    public String convertTimeUnit(long amount, TimeUnit timeUnit) {
+        switch (timeUnit) {
+            case NANOSECONDS :
+                return amount + " ns";
+            case MICROSECONDS :
+                return amount + " μs";
+            case MILLISECONDS :
+                return amount + " ms";
+            case SECONDS:
+                return amount + " s";
+            case MINUTES:
+                return amount + " m";
+            case HOURS:
+                return amount + " h";
+            case DAYS:
+                return amount + " d";
+            default :
+                return String.valueOf(amount);
+        }
+    }
+
+    /**
      * 根据double的值和单位，拼接其对应的四舍五入的字符串值.
      *
      * @param d double值
@@ -83,6 +126,22 @@ public class StrKit {
      */
     public String roundToString(double d) {
         return BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).toString();
+    }
+
+    /**
+     * 获取 {@code 62} 进制的长度为 19 位长度的 {@code UUID} 字符串.
+     *
+     * @return {@code 62} 进制位的 {@code UUID}
+     * @author blinkfox on 2020-05-27.
+     * @since v1.2.0
+     */
+    public String get62RadixUuid() {
+        UUID uuid = UUID.randomUUID();
+        return join(RadixKit.digits(uuid.getMostSignificantBits() >> 32, 8),
+                RadixKit.digits(uuid.getMostSignificantBits() >> 16, 4),
+                RadixKit.digits(uuid.getMostSignificantBits(), 4),
+                RadixKit.digits(uuid.getLeastSignificantBits() >> 48, 4),
+                RadixKit.digits(uuid.getLeastSignificantBits(), 12));
     }
 
 }

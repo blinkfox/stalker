@@ -1,15 +1,14 @@
 package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
-import com.blinkfox.stalker.kit.MathKit;
-import com.blinkfox.stalker.result.bean.OverallResult;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import com.blinkfox.stalker.kit.ConcurrentHashSet;
+import com.blinkfox.stalker.result.MeasureResult;
+import com.blinkfox.stalker.runner.executor.StalkerExecutors;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,29 +18,12 @@ import lombok.extern.slf4j.Slf4j;
  * @since v1.0.0
  */
 @Slf4j
-public class ConcurrentMeasureRunner implements MeasureRunner {
-
-    private static final int N_1024 = 1024;
+public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
 
     /**
-     * 每次'成功'测量出的待测量方法的耗时时间，单位为纳秒(ns).
+     * 用于存放正在运行中的 Future 线程，便于在手动"停止"运行时，能取消正在执行中的任务.
      */
-    private final Queue<Long> eachMeasures;
-
-    /**
-     * 测量过程中执行的总次数.
-     */
-    private final AtomicLong total;
-
-    /**
-     * 测量过程中执行成功的次数.
-     */
-    private final AtomicLong success;
-
-    /**
-     * 测量过程中执行失败的次数.
-     */
-    private final AtomicLong failure;
+    protected final Set<CompletableFuture<Void>> runningFutures;
 
     /**
      * 构造方法.
@@ -49,10 +31,8 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      * <p>这个类中的属性，需要支持高并发写入.</p>
      */
     public ConcurrentMeasureRunner() {
-        this.eachMeasures = new ConcurrentLinkedQueue<>();
-        this.total = new AtomicLong(0);
-        this.success = new AtomicLong(0);
-        this.failure = new AtomicLong(0);
+        super();
+        this.runningFutures = new ConcurrentHashSet<>();
     }
 
     /**
@@ -60,40 +40,51 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      *
      * @param options 运行的配置选项实例
      * @param runnable 可运行实例
-     * @return 测量结果
+     * @return 测量统计结果
      */
     @Override
-    public OverallResult run(Options options, Runnable runnable) {
+    public MeasureResult run(Options options, Runnable runnable) {
         int threads = options.getThreads();
         int concurrens = options.getConcurrens();
         int runs = options.getRuns();
         boolean printErrorLog = options.isPrintErrorLog();
 
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
-        Semaphore semaphore = new Semaphore(Math.min(concurrens, threads));
-        CountDownLatch countDownLatch = new CountDownLatch(threads);
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(threads, N_1024));
-        final long start = System.nanoTime();
+        Semaphore semaphore = new Semaphore(concurrens);
+        CountDownLatch countLatch = new CountDownLatch(threads);
+        super.executorService = StalkerExecutors.newFixedThreadExecutor(threads, "concurrent-measure-thread");
+        super.startNanoTime = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
         for (int i = 0; i < threads; i++) {
-            executorService.submit(() -> {
-                try {
-                    semaphore.acquire();
+            try {
+                semaphore.acquire();
+                // 如果线程池已经关闭，就直接返回结果.
+                if (super.executorService.isShutdown()) {
+                    return super.getMeasureResult();
+                }
+
+                final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     this.loopMeasure(runs, printErrorLog, runnable);
                     semaphore.release();
-                } catch (InterruptedException e) {
-                    log.error("测量方法耗时信息在多线程下出错!", e);
-                    Thread.currentThread().interrupt();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
+                    countLatch.countDown();
+                }, super.executorService);
+
+                // 将 future 添加到正在运行的 Future 信息集合中，并在 future 完成时,异步移除已经完成了的 future.
+                runningFutures.add(future);
+                future.whenCompleteAsync((a, b) -> runningFutures.remove(future));
+            } catch (InterruptedException e) {
+                log.error("【Stalker 错误提示】在多线程并发情况下测量任务执行的耗时信息的线程已被中断!", e);
+                Thread.currentThread().interrupt();
+            }
         }
 
-        // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
-        this.awaitAndShutdown(countDownLatch, executorService);
-        return this.buildMeasurement(System.nanoTime() - start);
+        // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
+        this.await(countLatch);
+        super.setEndNanoTimeIfEmpty(System.nanoTime());
+        super.completed.compareAndSet(false, true);
+        StalkerExecutors.shutdown(this.executorService);
+        return super.getMeasureResult();
     }
 
     /**
@@ -103,17 +94,16 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
      * @param printErrorLog 是否打印输出错误日志
      * @param runnable 可执行实例
      */
-    private void loopMeasure(int runs, boolean printErrorLog, final Runnable runnable) {
+    protected void loopMeasure(int runs, boolean printErrorLog, final Runnable runnable) {
         for (int j = 0; j < runs; j++) {
-            this.total.incrementAndGet();
             try {
                 long eachStart = System.nanoTime();
                 runnable.run();
-                this.eachMeasures.add(System.nanoTime() - eachStart);
-                this.success.incrementAndGet();
+                super.eachMeasures.offer(System.nanoTime() - eachStart);
+                super.success.increment();
             } catch (Exception e) {
                 // 如果待测量的方法，执行错误则失败数 +1,且根据选项参数来判断是否打印异常错误日志.
-                this.failure.incrementAndGet();
+                super.failure.increment();
                 if (printErrorLog) {
                     log.error("测量方法耗时信息在多线程下出错!", e);
                 }
@@ -122,44 +112,52 @@ public class ConcurrentMeasureRunner implements MeasureRunner {
     }
 
     /**
-     * 等待所有线程执行完毕，并最终关闭线程池.
+     * 停止相关的运行测量任务.
      *
-     * @param countDownLatch countDownLatch实例
-     * @param executorService 线程池
+     * <p>注意：如果任务未完成，则立即停止线程池，但是还不能停止正在运行中的若干任务线程，
+     * 暂时还没想到一个更好的、高性能的停止所有运行中的任务的方法.</p>
+     *
+     * @author blinkfox on 2020-05-25.
+     * @since v1.2.0
      */
-    private void awaitAndShutdown(CountDownLatch countDownLatch, ExecutorService executorService) {
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            log.error("在多线程下等待测量结果结束时出错!", e);
-            Thread.currentThread().interrupt();
-        } finally {
-            executorService.shutdown();
+    @Override
+    public void stop() {
+        if (!isCompleted()) {
+            super.setEndNanoTimeIfEmpty(System.nanoTime());
+            super.completed.compareAndSet(false, true);
+            super.canceled.compareAndSet(false, true);
+
+            // 停止时直接关闭线程池.
+            StalkerExecutors.shutdownNow(this.executorService);
+
+            // 迭代删除正在运行中的 Future，并取消正在运行中的任务.
+            Iterator<CompletableFuture<Void>> futureIterator = this.runningFutures.iterator();
+            while (futureIterator.hasNext()) {
+                CompletableFuture<Void> future = futureIterator.next();
+                this.runningFutures.remove(future);
+                if (!future.isDone()) {
+                    future.cancel(true);
+                }
+            }
         }
     }
 
     /**
-     * 构造测量的结果信息的 Measurement 对象.
+     * 等待所有线程执行完毕，并最终关闭线程池.
      *
-     * @param costs 消耗的总耗时，单位是纳秒
-     * @return Measurement对象
+     * @param countLatch 计数锁
+     * @author blinkfox on 2020-05-25.
+     * @since v1.2.0
      */
-    private OverallResult buildMeasurement(long costs) {
-        // 将队列转数组.
-        int len = this.eachMeasures.size();
-        long[] measures = new long[len];
-        for (int i = 0; i < len; i++) {
-            measures[i] = eachMeasures.remove();
+    private void await(CountDownLatch countLatch) {
+        try {
+            if (countLatch != null) {
+                countLatch.await();
+            }
+        } catch (InterruptedException e) {
+            log.error("【Stalker 错误提示】在并发执行下等待任务执行结束时出错!", e);
+            Thread.currentThread().interrupt();
         }
-
-        long totalCount = this.total.get();
-        return new OverallResult()
-                .setEachMeasures(measures)
-                .setCosts(costs)
-                .setTotal(totalCount)
-                .setSuccess(this.success.get())
-                .setFailure(this.failure.get())
-                .setThroughput(MathKit.calcThroughput(totalCount, costs));
     }
 
 }

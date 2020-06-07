@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MyTestService {
 
     /**
-     * 测试方法1，模拟业务代码耗时 2~5 ms，且会有约 5% 的几率执行异常.
+     * 测试方法1，模拟业务代码耗时 2~5 ms，且会有约 1% 的几率执行异常.
      */
     public void hello() {
         // 模拟运行抛出异常.
@@ -29,7 +29,20 @@ public class MyTestService {
      * 测试方法2，模拟业务代码耗时 2 ms.
      */
     public void fastHello() {
-        this.sleep(2L);
+        this.sleep(1L);
+    }
+
+    /**
+     * 测试方法3，模拟业务代码耗时 20~100 ms，且会有约 3% 的几率执行异常.
+     */
+    public void slowHello() {
+        // 模拟运行抛出异常.
+        if (new Random().nextInt(100) < 3) {
+            throw new MyServiceException("My Service Exception.");
+        }
+
+        // 模拟运行占用约 20~100 ms 的时间.
+        this.sleep(20L + new Random().nextInt(80));
     }
 
     /**
@@ -41,8 +54,7 @@ public class MyTestService {
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
-            log.info("InterruptedException", e);
-            Thread.currentThread().interrupt();
+            log.error("【Stalker 提示】本方法的执行已中断，异常简述为：【{}】.", e.getMessage());
         }
     }
 

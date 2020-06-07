@@ -2,7 +2,8 @@ package com.blinkfox.stalker.runner;
 
 import com.blinkfox.stalker.config.Options;
 import com.blinkfox.stalker.kit.StrKit;
-import com.blinkfox.stalker.result.bean.OverallResult;
+import com.blinkfox.stalker.result.MeasureResult;
+import com.blinkfox.stalker.result.StalkerFuture;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,7 +36,7 @@ public final class MeasureRunnerContext {
      * @param options 参数选项
      * @param runnable runnable
      */
-    private void warmup(Options options, Runnable runnable) {
+    private static void warmup(Options options, Runnable runnable) {
         final boolean printErrorLog = options.isPrintErrorLog();
         log.debug("【stalker 提示】预热开始...");
         long start = System.nanoTime();
@@ -61,13 +62,50 @@ public final class MeasureRunnerContext {
      * 检查Options参数是否合法，并进行预热准备，然后执行 runnable 方法，并将执行结果的耗时纳秒(ns)值存入到集合中.
      *
      * @param runnable 可运行实例
-     * @return 运行的测量结果
+     * @return 运行的测量统计结果信息
      */
-    public OverallResult run(Runnable runnable) {
-        this.warmup(options, runnable);
-        return options.getThreads() > 1 && options.getConcurrens() > 1
-                ? new ConcurrentMeasureRunner().run(options, runnable)
-                : new SimpleMeasureRunner().run(options, runnable);
+    public MeasureResult run(Runnable runnable) {
+        warmup(options, runnable);
+        if (options.getDuration() != null) {
+            return options.getConcurrens() > 1
+                    ? new ConcurrentScheduledMeasureRunner().run(options, runnable)
+                    : new SimpleScheduledMeasureRunner().run(options, runnable);
+        } else {
+            return options.getConcurrens() > 1
+                    ? new ConcurrentMeasureRunner().run(options, runnable)
+                    : new SimpleMeasureRunner().run(options, runnable);
+        }
+    }
+
+    /**
+     * 检查Options参数是否合法，并进行预热准备，然后执行 runnable 方法，并将执行结果的耗时纳秒(ns)值存入到集合中.
+     *
+     * @param options 运行的选项参数
+     * @param runnable 可运行实例
+     * @return 此次运行的会话 ID
+     * @author blinkfox on 2020-05-23.
+     * @since v1.2.0
+     */
+    public static StalkerFuture submit(final Options options, final Runnable runnable) {
+        // 预热运行.
+        warmup(options, runnable);
+
+        // 获取对应的 measureRunner，并将 measureRunner 存储到 map 中，并异步执行任务.
+        MeasureRunner measureRunner;
+        if (options.getDuration() != null) {
+            measureRunner = options.getConcurrens() > 1
+                    ? new ConcurrentScheduledMeasureRunner()
+                    : new SimpleScheduledMeasureRunner();
+        } else {
+            measureRunner = options.getConcurrens() > 1
+                    ? new ConcurrentMeasureRunner()
+                    : new SimpleMeasureRunner();
+        }
+
+        // 构造 StalkerFuture 对象，并开始运行任务.
+        StalkerFuture stalkerFuture = new StalkerFuture(options, runnable, measureRunner);
+        stalkerFuture.run();
+        return stalkerFuture;
     }
 
 }

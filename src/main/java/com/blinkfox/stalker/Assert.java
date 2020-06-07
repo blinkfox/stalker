@@ -29,26 +29,9 @@ public class Assert {
      */
     public void assertFaster(Options options, Runnable runnable1, Runnable runnable2) {
         MeasureRunnerContext runnerContext = new MeasureRunnerContext(options);
-        if (calcSum(runnerContext.run(runnable1).getEachMeasures())
-                >= calcSum(runnerContext.run(runnable2).getEachMeasures())) {
+        if (runnerContext.run(runnable1).getSum() >= runnerContext.run(runnable2).getSum()) {
             fail();
         }
-    }
-
-    /**
-     * 计算long数组中的总和.
-     *
-     * @param arr long数组
-     * @return 总和
-     */
-    private long calcSum(long[] arr) {
-        int sum = 0;
-        if (arr != null && arr.length > 0) {
-            for (long n : arr) {
-                sum += n;
-            }
-        }
-        return sum;
     }
 
 }
