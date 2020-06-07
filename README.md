@@ -6,15 +6,15 @@
 
 > 这是一个简单的用来对 Java 代码做性能评估的工具库。
 
-## 特性
+## 一、特性
 
 - 轻量级（jar包仅`49kb`）
 - 支持对性能的多种统计纬度
 - API简单易用，易于集成或扩展
 
-## 快速集成
+## 二、快速集成
 
-### Maven集成
+### 1. Maven
 
 ```xml
 <dependency>
@@ -24,13 +24,13 @@
 </dependency>
 ```
 
-### Gradle
+### 2. Gradle
 
 ```bash
-compile 'com.blinkfox:stalker:1.2.0-SNAPSHOT'
+compile 'com.blinkfox:stalker:1.2.0'
 ```
 
-## API 介绍和使用
+## 三、API 介绍和使用
 
 ### 预先准备
 
@@ -349,11 +349,11 @@ Assert.assertFaster(Options.of(),
         () -> new MyTestService().hello());
 ```
 
-## 许可证
+## 四、许可证
 
 本 [stalker](https://github.com/blinkfox/stalker) 类库遵守 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0) 许可证。
 
-## 变更日志
+## 五、变更日志
 
 - v1.2.0 新增了异步性能评估和大量的代码重构 (2020-06-07)
   - 新增了异步提交任务作性能评估；
