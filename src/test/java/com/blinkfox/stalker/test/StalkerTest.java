@@ -2,8 +2,11 @@ package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.output.AsciiTableOutput;
+import com.blinkfox.stalker.output.MeasureOutput;
 import com.blinkfox.stalker.result.StalkerFuture;
 import com.blinkfox.stalker.test.prepare.MyTestService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -137,10 +140,7 @@ public class StalkerTest {
     public void submit() {
         StalkerFuture stalkerFuture = Stalker
                 .submit(() -> new MyTestService().hello())
-                .waitDone(future -> {
-                    List<Object> results = future.get();
-                    Assert.assertNotNull(results.get(0));
-                }, 2L)
+                .waitDone(future -> Assert.assertNotNull(future.getFirst()), 2L)
                 .done(future -> {
                     log.info("任务已完成，获取最后的执行结果.");
                     future.get();
@@ -156,8 +156,7 @@ public class StalkerTest {
         StalkerFuture stalkerFuture = Stalker
                 .submit(Options.of("SlowTest", 20, 5), () -> new MyTestService().slowHello())
                 .waitDone(future -> {
-                    List<Object> results = future.get();
-                    Assert.assertNotNull(results.get(0));
+                    Assert.assertNotNull(future.getFirst());
                 }, 50L)
                 .done(future -> {
                     log.info("任务已完成，获取最后的执行结果.");
@@ -178,8 +177,7 @@ public class StalkerTest {
         // 执行过程中或执行完成后执行的方法.
         stalkerFuture
                 .waitDone(future -> {
-                    List<Object> results = future.get();
-                    Assert.assertNotNull(results.get(0));
+                    Assert.assertNotNull(future.getFirst());
                 })
                 .done(future -> {
                     log.info("任务已完成，获取最后的执行结果.");
@@ -215,8 +213,7 @@ public class StalkerTest {
         Assert.assertNotNull(stalkerFuture);
 
         Thread.sleep(50L);
-        List<Object> results = stalkerFuture.get();
-        Assert.assertNotNull(results.get(0));
+        Assert.assertNotNull(stalkerFuture.getFirst());
 
         // 取消任务.
         boolean isCancelled = stalkerFuture.cancel();
@@ -238,13 +235,18 @@ public class StalkerTest {
      */
     @Test
     public void submitWithDuration() {
-        Stalker.submit(Options.ofDurationSeconds(15, 5), () -> new MyTestService().slowHello())
-                .waitDone(StalkerFuture::get, 5000L)
+        // 构造新的输出结果.
+        List<MeasureOutput> measureOutputs = new ArrayList<>();
+        measureOutputs.add(new AsciiTableOutput());
+        Options options = Options.ofDurationSeconds(15, 5).outputs(measureOutputs);
+
+        Stalker.submit(options, () -> new MyTestService().slowHello())
+                .waitDone(StalkerFuture::get, 3000L)
                 .done(future -> {
                     log.info("任务已完成，获取最终的执行结果信息.");
                     future.get();
                     Assert.assertTrue(future.getStartNanoTime() > 0);
-                    Assert.assertTrue(future.isDoneSuccessfully());
+                    Assert.assertTrue(future.isDone());
                     Assert.assertEquals(future.getTotal(), future.getSuccess() + future.getFailure());
                     Assert.assertTrue(future.getCosts() > 0);
                 });

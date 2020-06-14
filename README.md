@@ -18,14 +18,14 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
 ### 2. Gradle
 
 ```bash
-compile 'com.blinkfox:stalker:1.2.0'
+compile 'com.blinkfox:stalker:1.2.1'
 ```
 
 ## 三、API 介绍和使用
@@ -161,19 +161,17 @@ Stalker 中的 `run` 方法默认是同步执行的，如果你的性能测试�
 
 ```java
 @Test
-public void submitWithSlowMethod() throws InterruptedException {
-    StalkerFuture stalkerFuture = Stalker.submit(Options.of("SlowTest", 20, 5, 1),
-            () -> new MyTestService().slowHello());
-    Assert.assertNotNull(stalkerFuture);
-
-    while (!stalkerFuture.isDone()) {
-        List<Object> results = stalkerFuture.get();
-        Assert.assertNotNull(results.get(0));
-        Thread.sleep(50L);
-    }
-
-    log.info("任务已完成，获取最后的执行结果.");
-    stalkerFuture.get();
+public void submitWithSlowMethod() {
+    StalkerFuture stalkerFuture = Stalker
+            .submit(Options.of("SlowTest", 20, 5), () -> new MyTestService().slowHello())
+            .waitDone(future -> {
+                Assert.assertNotNull(future.getFirst());
+            }, 50L)
+            .done(future -> {
+                log.info("任务已完成，获取最后的执行结果.");
+                future.get();
+            });
+    Assert.assertTrue(stalkerFuture.isDone());
 }
 ```
 
@@ -214,17 +212,17 @@ public void submitWithSlowMethod() throws InterruptedException {
 
 ```java
 @Test
-public void submitWithDuration() throws InterruptedException {
-    StalkerFuture stalkerFuture = Stalker.submit(Options.ofDurationSeconds(15, 5),
-            () -> new MyTestService().slowHello());
-
-    // 判断任务是否完成，没完成，则休眠 5 秒 直到完成为止.
-    while (!stalkerFuture.isDone()) {
-        Thread.sleep(5000L);
-    }
-
-    log.info("任务已完成，获取最终的执行结果信息.");
-    stalkerFuture.get();
+public void submitWithDuration() {
+    Stalker.submit(Options.ofDurationSeconds(15, 5), () -> new MyTestService().slowHello())
+            .waitDone(StalkerFuture::get, 3000L)
+            .done(future -> {
+                log.info("任务已完成，获取最终的执行结果信息.");
+                future.get();
+                Assert.assertTrue(future.getStartNanoTime() > 0);
+                Assert.assertTrue(future.isDone());
+                Assert.assertEquals(future.getTotal(), future.getSuccess() + future.getFailure());
+                Assert.assertTrue(future.getCosts() > 0);
+            });
 }
 ```
 
@@ -247,17 +245,22 @@ public void submitWithDuration() throws InterruptedException {
 ```java
 @Test
 public void submitWithStop() throws InterruptedException {
-    StalkerFuture stalkerFuture = Stalker.submit(Options.of("StopTest", 20, 5, 1),
+    StalkerFuture stalkerFuture = Stalker.submit(Options.of("StopTest", 200, 5, 1),
             () -> new MyTestService().slowHello());
+    Assert.assertNotNull(stalkerFuture);
 
     Thread.sleep(50L);
-    List<Object> results = stalkerFuture.get();
-    Assert.assertNotNull(results.get(0));
-    // 调用 cancel 取消任务.
-    stalkerFuture.cancel();
+    Assert.assertNotNull(stalkerFuture.getFirst());
 
-    stalkerFuture.get();
-    log.info("任务已停止，获取最后的执行结果.");
+    // 取消任务.
+    boolean isCancelled = stalkerFuture.cancel();
+    if (isCancelled) {
+        log.info("任务已停止，获取停止前的执行结果.");
+    } else {
+        log.info("任务停止失败.");
+    }
+
+    stalkerFuture.done(StalkerFuture::get);
 }
 ```
 
@@ -319,12 +322,18 @@ Options 表示做性能测量时的选项参数
 
 ### StalkerFuture 类
 
-- `void run()`: 执行可运行的方法，通常你不需要再去手动执行了。
+- `void run()`: 执行可运行的方法，通常你不需要再去手动执行了.
+- `StalkerFuture waitDone()`: 一直阻塞等待执行结束，`v1.2.1` 版本新增.
+- `StalkerFuture waitDone(long period)`: 一直阻塞等待执行结束，可传入循环等待的间隔时间，`v1.2.1` 版本新增.
+- `StalkerFuture waitDone(Consumer<StalkerFuture> waitPeriodConsumer)`: 一直阻塞等待执行结束，会每隔 1s 执行传入的可运行任务，`v1.2.1` 版本新增.
+- `StalkerFuture waitDone(Consumer<StalkerFuture> waitPeriodConsumer, long period)`: 一直阻塞等待执行结束，会每隔一段指定的时间执行传入的可运行任务，`v1.2.1` 版本新增.
+- `StalkerFuture done(Consumer<StalkerFuture> futureConsumer)`: 所有测量任务完成后执行的回调任务，`v1.2.1` 版本新增.
 - `boolean cancel()`: 取消正在运行中的任务.
 - `boolean cancel(boolean mayInterruptIfRunning)` 取消正在运行中的任务.
 - `boolean isCancelled()`: 是否已经取消了执行中的性能测试任务。
 - `boolean isDone()`: 是否已经执行完成.
 - `boolean isDoneSuccessfully()`: 是否是正常执行完成的.
+- `Object getFirst()`: 实时获取任务第一个输出通道的执行结果.
 - `List<Object> get()`: 实时获取任务的执行结果，该方法不会阻塞任务执行.
 - `List<Object> get(long timeout, TimeUnit unit)`: 实时获取任务的执行结果，该方法不会阻塞任务执行.
 - `MeasureResult getMeasureResult()`: 获取基础的测量统计结果信息.
@@ -353,6 +362,9 @@ Assert.assertFaster(Options.of(),
 
 ## 五、变更日志
 
+- v1.2.1 新增了部分 API (2020-06-15)
+  - 新增了 `waitDone` 和 `done` 相关的 API；
+  - 新增了 `AsciiTableOutput` 的 ASCII 表格结果输出；
 - v1.2.0 新增了异步性能评估和大量的代码重构 (2020-06-07)
   - 新增了异步提交任务作性能评估；
   - 重构了大量代码，部分方法或类与之前的版本不兼容；
