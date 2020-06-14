@@ -13,6 +13,7 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,11 +84,11 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
             final TimeUnit timeUnit = scheduledUpdater.getTimeUnit();
             this.scheduledUpdateFuture = this.scheduledUpdateExecutor.scheduleWithFixedDelay(() -> {
                 if (log.isDebugEnabled()) {
-                    log.debug("【Stalker 提示】开始了每隔【{}】执行一次定时更新统计数据的定时任务.", StrKit.convertTimeUnit(delay, timeUnit));
+                    log.debug("【Stalker 提示】开始了每隔【{}】执行一次定时更新统计数据的定时任务.",
+                            StrKit.convertTimeUnit(delay, timeUnit));
                 }
                 this.measureRunner.getMeasureResult();
-            },
-            scheduledUpdater.getInitialDelay(), delay, timeUnit);
+            }, scheduledUpdater.getInitialDelay(), delay, timeUnit);
         }
     }
 
@@ -110,6 +111,99 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
                 // 当任务完成之后，如果有其他异步任务没完成或关闭，就关闭相关的异步任务.
                 this.runFuture.whenComplete((a, e) -> stopFutures());
             }
+        }
+    }
+
+    /**
+     * 阻塞式等待测量任务完成，默认等待执行的间隔时间是 500 毫秒.
+     *
+     * @return 当前的 {@link StalkerFuture} 对象实例
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    public StalkerFuture waitDone() {
+        return this.waitDone(null, 500L);
+    }
+
+    /**
+     * 阻塞式等待测量任务完成，可以传入循环等待的间隔时间.
+     *
+     * @param period 每次执行的间隔时间，单位毫秒(ms).
+     * @return 当前的 {@link StalkerFuture} 对象实例
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    public StalkerFuture waitDone(long period) {
+        return this.waitDone(null, period);
+    }
+
+    /**
+     * 阻塞式等待测量任务完成，等待期间会执行传入的可运行任务，默认执行的间隔时间是 1 秒.
+     *
+     * @param waitPeriodConsumer 等待完成期间，每隔 1s 执行的可运行任务
+     * @return 当前的 {@link StalkerFuture} 对象实例
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    public StalkerFuture waitDone(Consumer<StalkerFuture> waitPeriodConsumer) {
+        return this.waitDone(waitPeriodConsumer, 1000L);
+    }
+
+    /**
+     * 阻塞式等待测量任务完成，等待期间会每隔一段时间执行传入的可运行任务.
+     *
+     * @param waitPeriodConsumer 等待完成期间，每隔一段时间执行的可运行任务
+     * @param period 每次执行的间隔时间，单位毫秒(ms).
+     * @return 当前的 {@link StalkerFuture} 对象实例
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    public StalkerFuture waitDone(Consumer<StalkerFuture> waitPeriodConsumer, long period) {
+        // 等待完成期间执行的任务.
+        while (!this.isDone()) {
+            if (waitPeriodConsumer != null) {
+                waitPeriodConsumer.accept(this);
+            }
+            this.sleep(period);
+        }
+        return this;
+    }
+
+    /**
+     * 所有测量任务完成后执行的回调任务.
+     *
+     * @param futureConsumer 任务执行完成后的回调时的可运行任务
+     * @return 当前的 {@link StalkerFuture} 对象实例
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    public StalkerFuture done(Consumer<StalkerFuture> futureConsumer) {
+        // 如果没完成，就阻塞休眠一定的时间，再判断是否完成了.
+        while (!this.isDone()) {
+            this.sleep(200L);
+        }
+
+        // 完成后执行对应的回调任务.
+        if (futureConsumer != null) {
+            futureConsumer.accept(this);
+        }
+        return this;
+    }
+
+    /**
+     * 将当前线程以阻塞的形式睡眠一定的时间.
+     *
+     * @param time 睡眠的时间
+     * @author blinkfox on 2020-06-14.
+     * @since v1.2.1
+     */
+    private void sleep(long time) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(time);
+        } catch (InterruptedException e) {
+            log.error("【Stalker 错误】在每隔【{} ms】执行【progressRunnable】可运行任务时发生中断，"
+                    + "中断原因：【{}】.", time, e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 
