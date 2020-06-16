@@ -2,12 +2,11 @@ package com.blinkfox.stalker.test;
 
 import com.blinkfox.stalker.Stalker;
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.kit.StrKit;
 import com.blinkfox.stalker.output.AsciiTableOutput;
 import com.blinkfox.stalker.output.MeasureOutput;
 import com.blinkfox.stalker.result.StalkerFuture;
 import com.blinkfox.stalker.test.prepare.MyTestService;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -240,9 +239,11 @@ public class StalkerTest {
                 .outputs(MeasureOutput.ofList(new AsciiTableOutput()));
 
         Stalker.submit(options, () -> new MyTestService().slowHello())
-                .waitDone(future -> log.info("\n{}.", future.getFirst()), 3000L)
+                .waitDone(future -> log.info("\n{}\n当前进度: [{}%].", future.getFirst(),
+                        StrKit.roundToString(Stalker.getProgress(options, future.getMeasureResult()))), 3000L)
                 .done(future -> {
-                    log.info("任务已完成，获取最终的执行结果信息.");
+                    log.info("任务已完成，进度:【{}%】，获取最终的执行结果信息.",
+                            StrKit.roundToString(Stalker.getProgress(options, future.getMeasureResult())));
                     log.info("\n{}.", future.getFirst());
                     Assert.assertTrue(future.getStartNanoTime() > 0);
                     Assert.assertTrue(future.isDone());

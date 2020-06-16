@@ -110,11 +110,11 @@ public class RunDuration {
      */
     public long getAmountNanoTime() {
         switch (this.timeUnit) {
-            case NANOSECONDS :
+            case NANOSECONDS:
                 return amount;
-            case MICROSECONDS :
+            case MICROSECONDS:
                 return amount * 1000L;
-            case MILLISECONDS :
+            case MILLISECONDS:
                 return amount * 1000_000L;
             case SECONDS:
                 return amount * 1000_000_000L;
@@ -124,7 +124,7 @@ public class RunDuration {
                 return amount * 3600_000_000_000L;
             case DAYS:
                 return amount * 86400_000_000_000L;
-            default :
+            default:
                 return 0;
         }
     }
@@ -146,6 +146,55 @@ public class RunDuration {
         if (amount <= 0) {
             throw new IllegalArgumentException("【Stalker 无效参数异常】运行的续时间必须是正整数，获取到的值是：【" + amount + "】.");
         }
+    }
+
+    /**
+     * 解析传入的持续时间字符串为秒数，格式如：{@code 2d5h23m1s}.
+     *
+     * <p>注：时间单位只能是 {@code d, h, m, s} 四个，无视大小写，分别表示天、时、分、秒，
+     * 如果没有任何单位，则单位默认是秒，如果有其他字母，则会忽略.</p>
+     *
+     * @param duration 持续时间字符串.
+     * @return 持续时间的秒数数值
+     * @author blinkfox on 2020-06-16.
+     * @since v1.2.2
+     */
+    public static long parseToSeconds(String duration) {
+        long totalSeconds = 0;
+        // 如果是数字，就记录下来，如果是单位字符，就累计出所有的秒数，其他字符则直接跳过.
+        StringBuilder sb = new StringBuilder();
+        for (char c : duration.toCharArray()) {
+            if (c >= '0' && c <= '9') {
+                sb.append(c);
+            } else if (c == 'd' || c == 'D') {
+                String day = sb.toString();
+                if (day.length() > 0) {
+                    totalSeconds += Long.parseLong(day) * 86400;
+                    sb.setLength(0);
+                }
+            } else if (c == 'h' || c == 'H') {
+                String hour = sb.toString();
+                if (hour.length() > 0) {
+                    totalSeconds += Long.parseLong(hour) * 3600;
+                    sb.setLength(0);
+                }
+            } else if (c == 'm' || c == 'M') {
+                String minute = sb.toString();
+                if (minute.length() > 0) {
+                    totalSeconds += Long.parseLong(minute) * 60;
+                    sb.setLength(0);
+                }
+            } else if (c == 's' || c == 'S') {
+                String second = sb.toString();
+                if (second.length() > 0) {
+                    totalSeconds += Long.parseLong(second);
+                    sb.setLength(0);
+                }
+            } else {
+                sb.setLength(0);
+            }
+        }
+        return totalSeconds;
     }
 
     /**

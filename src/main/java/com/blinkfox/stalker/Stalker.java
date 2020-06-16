@@ -1,6 +1,7 @@
 package com.blinkfox.stalker;
 
 import com.blinkfox.stalker.config.Options;
+import com.blinkfox.stalker.config.RunDuration;
 import com.blinkfox.stalker.output.MeasureOutputContext;
 import com.blinkfox.stalker.result.MeasureResult;
 import com.blinkfox.stalker.result.StalkerFuture;
@@ -93,6 +94,23 @@ public class Stalker {
             measurements[i] = new MeasureRunnerContext(options).run(runnables[i]);
         }
         return measurements;
+    }
+
+    /**
+     * 根据 {@link Options} 和 {@link MeasureResult} 来动态计算出运行任务的进度值，值的范围在 {@code 0 ~ 100} 之间.
+     *
+     * @param options 选项参数
+     * @param result 运行测量的结果
+     * @return 进度的 double 值，值的范围在 {@code 0 ~ 100} 之间.
+     * @author blinkfox on 2020-06-16.
+     * @since v1.2.2
+     */
+    public double getProgress(Options options, MeasureResult result) {
+        RunDuration duration = options.getDuration();
+        double progress = duration != null
+                ? (result.getCosts() * 100d) / duration.getAmountNanoTime()
+                : (result.getTotal() * 100d) / options.getThreads();
+        return progress > 100 ? 100d : progress;
     }
 
 }
