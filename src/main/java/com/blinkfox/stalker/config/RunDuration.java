@@ -98,23 +98,34 @@ public class RunDuration {
      * @return 结束纳秒时间
      */
     public long getEndNanoTime(long startNanoTime) {
+        return startNanoTime + this.getAmountNanoTime();
+    }
+
+    /**
+     * 获取总持续时间的纳秒数值.
+     *
+     * @return 结束纳秒时间
+     * @author blinkfox on 2020-06-16.
+     * @since v1.2.2
+     */
+    public long getAmountNanoTime() {
         switch (this.timeUnit) {
             case NANOSECONDS :
-                return startNanoTime + amount;
+                return amount;
             case MICROSECONDS :
-                return startNanoTime + amount * 1000L;
+                return amount * 1000L;
             case MILLISECONDS :
-                return startNanoTime + amount * 1000_000L;
+                return amount * 1000_000L;
             case SECONDS:
-                return startNanoTime + amount * 1000_000_000L;
+                return amount * 1000_000_000L;
             case MINUTES:
-                return startNanoTime + amount * 60_000_000_000L;
+                return amount * 60_000_000_000L;
             case HOURS:
-                return startNanoTime + amount * 3600_000_000_000L;
+                return amount * 3600_000_000_000L;
             case DAYS:
-                return startNanoTime + amount * 86400_000_000_000L;
+                return amount * 86400_000_000_000L;
             default :
-                return startNanoTime;
+                return 0;
         }
     }
 

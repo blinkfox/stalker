@@ -18,14 +18,14 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
 </dependency>
 ```
 
 ### 2. Gradle
 
 ```bash
-compile 'com.blinkfox:stalker:1.2.1'
+compile 'com.blinkfox:stalker:1.2.2'
 ```
 
 ## 三、API 介绍和使用
@@ -362,6 +362,8 @@ Assert.assertFaster(Options.of(),
 
 ## 五、变更日志
 
+- v1.2.2 新增了部分 API (2020-06-16)
+  - 新增了和改进了部分 API；
 - v1.2.1 新增了部分 API (2020-06-15)
   - 新增了 `waitDone` 和 `done` 相关的 API；
   - 新增了 `AsciiTableOutput` 的 ASCII 表格结果输出；

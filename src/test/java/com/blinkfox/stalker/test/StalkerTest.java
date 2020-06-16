@@ -236,15 +236,14 @@ public class StalkerTest {
     @Test
     public void submitWithDuration() {
         // 构造新的输出结果.
-        List<MeasureOutput> measureOutputs = new ArrayList<>();
-        measureOutputs.add(new AsciiTableOutput());
-        Options options = Options.ofDurationSeconds(15, 5).outputs(measureOutputs);
+        Options options = Options.ofDurationSeconds(15, 5)
+                .outputs(MeasureOutput.ofList(new AsciiTableOutput()));
 
         Stalker.submit(options, () -> new MyTestService().slowHello())
-                .waitDone(StalkerFuture::get, 3000L)
+                .waitDone(future -> log.info("\n{}.", future.getFirst()), 3000L)
                 .done(future -> {
                     log.info("任务已完成，获取最终的执行结果信息.");
-                    future.get();
+                    log.info("\n{}.", future.getFirst());
                     Assert.assertTrue(future.getStartNanoTime() > 0);
                     Assert.assertTrue(future.isDone());
                     Assert.assertEquals(future.getTotal(), future.getSuccess() + future.getFailure());

@@ -43,9 +43,9 @@ public class StrKitTest {
         Assert.assertEquals("32.53 ms", StrKit.convertTime(32_525_623));
         Assert.assertEquals("1.53 s", StrKit.convertTime(1_526_165_603));
         Assert.assertEquals("1.67 min", StrKit.convertTime(100_000_000_000L));
-        Assert.assertEquals("5.0 h", StrKit.convertTime(18_000_000_000_000L));
-        Assert.assertEquals("5.0 h", StrKit.convertTime(18_000_000_000_000L));
-        Assert.assertEquals("3.0 d", StrKit.convertTime(259_200_000_000_000L));
+        Assert.assertEquals("5.00 h", StrKit.convertTime(18_000_000_000_000L));
+        Assert.assertEquals("5.00 h", StrKit.convertTime(18_000_000_000_000L));
+        Assert.assertEquals("3.00 d", StrKit.convertTime(259_200_000_000_000L));
     }
 
     /**
@@ -58,14 +58,6 @@ public class StrKitTest {
         Assert.assertEquals("32723.10", StrKit.roundToString(32723.1));
         Assert.assertEquals("36.12", StrKit.roundToString(36.12));
         Assert.assertEquals("27.00", StrKit.roundToString(26.998));
-    }
-
-    /**
-     * 测试获取 UUID.
-     */
-    @Test
-    public void get62RadixUuid() {
-        Assert.assertEquals(19, StrKit.get62RadixUuid().length());
     }
 
 }

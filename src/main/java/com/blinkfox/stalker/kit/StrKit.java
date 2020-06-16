@@ -2,7 +2,6 @@ package com.blinkfox.stalker.kit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import org.slf4j.helpers.MessageFormatter;
@@ -88,11 +87,11 @@ public class StrKit {
      */
     public String convertTimeUnit(long amount, TimeUnit timeUnit) {
         switch (timeUnit) {
-            case NANOSECONDS :
+            case NANOSECONDS:
                 return amount + " ns";
-            case MICROSECONDS :
+            case MICROSECONDS:
                 return amount + " μs";
-            case MILLISECONDS :
+            case MILLISECONDS:
                 return amount + " ms";
             case SECONDS:
                 return amount + " s";
@@ -102,7 +101,7 @@ public class StrKit {
                 return amount + " h";
             case DAYS:
                 return amount + " d";
-            default :
+            default:
                 return String.valueOf(amount);
         }
     }
@@ -115,7 +114,7 @@ public class StrKit {
      * @return 四舍五入后的时间字符串
      */
     private String roundToString(double d, String unit) {
-        return join(BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).doubleValue(), " ", unit);
+        return join(BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).toString(), " ", unit);
     }
 
     /**
@@ -126,22 +125,6 @@ public class StrKit {
      */
     public String roundToString(double d) {
         return BigDecimal.valueOf(d).setScale(2, RoundingMode.HALF_UP).toString();
-    }
-
-    /**
-     * 获取 {@code 62} 进制的长度为 19 位长度的 {@code UUID} 字符串.
-     *
-     * @return {@code 62} 进制位的 {@code UUID}
-     * @author blinkfox on 2020-05-27.
-     * @since v1.2.0
-     */
-    public String get62RadixUuid() {
-        UUID uuid = UUID.randomUUID();
-        return join(RadixKit.digits(uuid.getMostSignificantBits() >> 32, 8),
-                RadixKit.digits(uuid.getMostSignificantBits() >> 16, 4),
-                RadixKit.digits(uuid.getMostSignificantBits(), 4),
-                RadixKit.digits(uuid.getLeastSignificantBits() >> 48, 4),
-                RadixKit.digits(uuid.getLeastSignificantBits(), 12));
     }
 
 }
