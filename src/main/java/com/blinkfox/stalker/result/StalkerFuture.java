@@ -146,7 +146,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
      * @since v1.2.1
      */
     public StalkerFuture waitDone(Consumer<StalkerFuture> waitPeriodConsumer) {
-        return this.waitDone(waitPeriodConsumer, 1000L);
+        return this.waitDone(waitPeriodConsumer, 500L);
     }
 
     /**
@@ -187,6 +187,9 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         if (futureConsumer != null) {
             futureConsumer.accept(this);
         }
+
+        // 立即取消相关任务和关闭线程池资源.
+        this.cancel();
         return this;
     }
 
@@ -249,6 +252,10 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         // 立即停止当前异步测量线程任务.
         if (this.runFuture != null && !this.runFuture.isDone()) {
             this.runFuture.cancel(true);
+        }
+        // 关闭本 Future 中用到的线程池.
+        if (!executor.isShutdown()) {
+            executor.shutdownNow();
         }
 
         // 如果线程池未关闭，就关闭线程池，注意，这里不要理解关闭和立即终止正在运行中的任务，防止最后的统计数据更新异常.
