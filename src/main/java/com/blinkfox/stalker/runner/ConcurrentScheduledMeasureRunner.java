@@ -38,9 +38,9 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
      */
     public ConcurrentScheduledMeasureRunner() {
         super();
-        this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "concurrent-scheduled-thread");
+        this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "stalker-concurrent-scheduled");
         super.executorService = StalkerExecutors.newFixedThreadExecutor(
-                StalkerExecutors.MAX_POOL_SIZE, "concurrent-measure-thread");
+                StalkerExecutors.MAX_POOL_SIZE, "stalker-concurrent-scheduled-measure");
     }
 
     /**
@@ -95,7 +95,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         // 等待所有线程执行完毕，记录是否完成和完成时间，并关闭线程池等资源，最后将结果封装成实体信息返回.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(this.executorService, this.scheduledExecutorService);
+        StalkerExecutors.shutdownNow(this.executorService, this.scheduledExecutorService);
         if (!this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }
@@ -110,7 +110,7 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         super.stop();
 
         // 关闭定时任务线程池和取消对应的定时任务.
-        StalkerExecutors.shutdown(this.scheduledExecutorService);
+        StalkerExecutors.shutdownNow(this.scheduledExecutorService);
         if (this.scheduledFuture != null && !this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }

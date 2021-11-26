@@ -235,7 +235,7 @@ public class StalkerTest {
     @Test
     public void submitWithDuration() {
         // 构造新的输出结果.
-        Options options = Options.ofDurationSeconds(5, 3).warmups(0)
+        Options options = Options.ofDurationSeconds(15, 3).warmups(0)
                 .outputs(MeasureOutput.ofList(new AsciiTableOutput()));
 
         Stalker.submit(options, () -> new MyTestService().slowHello())

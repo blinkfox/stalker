@@ -52,7 +52,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         // 初始化存储的集合、线程池、并发工具类中的对象实例等.
         Semaphore semaphore = new Semaphore(concurrens);
         CountDownLatch countLatch = new CountDownLatch(threads);
-        super.executorService = StalkerExecutors.newFixedThreadExecutor(threads, "concurrent-measure-thread");
+        super.executorService = StalkerExecutors.newFixedThreadExecutor(threads, "stalker-concurrent-measure");
         super.startNanoTime = System.nanoTime();
 
         // 在多线程下控制线程并发量，与循环搭配来一起执行和测量.
@@ -83,7 +83,7 @@ public class ConcurrentMeasureRunner extends AbstractMeasureRunner {
         this.await(countLatch);
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(this.executorService);
+        StalkerExecutors.shutdownNow(this.executorService);
         return super.getMeasureResult();
     }
 

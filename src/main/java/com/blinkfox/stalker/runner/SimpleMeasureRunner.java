@@ -28,6 +28,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
      */
     public SimpleMeasureRunner() {
         super();
+        super.executorService = StalkerExecutors.newSingleThreadExecutor("stalker-simple-measure");
     }
 
     /**
@@ -41,12 +42,11 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
     public MeasureResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
         int totalCount = options.getThreads() * options.getRuns();
-        super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-measure-thread");
         super.startNanoTime = System.nanoTime();
 
         // 由于并发数是 1，直接单线程循环执行 (runs * threads) 次即可，
         // 将执行的相关任务以 Future 的形式来执行，便于程序动态取消任务或判断任务执行情况等.
-        this.measureFuture = executorService.submit(() -> {
+        this.measureFuture = super.executorService.submit(() -> {
             for (int i = 0; i < totalCount; ++i) {
                 try {
                     // 开始执行测量任务，记录开始时间、执行次数等.
@@ -75,7 +75,7 @@ public class SimpleMeasureRunner extends AbstractMeasureRunner {
         // 等待所有线程执行完毕，并关闭线程池，最后将结果封装成实体信息.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(super.executorService);
+        StalkerExecutors.shutdownNow(super.executorService);
         return super.getMeasureResult();
     }
 

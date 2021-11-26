@@ -1,12 +1,12 @@
 # stalker
 
-[![HitCount](http://hits.dwyl.io/blinkfox/stalker.svg)](http://hits.dwyl.io/blinkfox/stalker) [![Build Status](https://secure.travis-ci.org/blinkfox/stalker.svg)](https://travis-ci.org/blinkfox/stalker) [![GitHub license](https://img.shields.io/github/license/blinkfox/stalker.svg)](https://github.com/blinkfox/stalker/blob/master/LICENSE) [![codecov](https://codecov.io/gh/blinkfox/stalker/branch/master/graph/badge.svg)](https://codecov.io/gh/blinkfox/stalker) ![Java Version](https://img.shields.io/badge/Java-%3E%3D%208-blue.svg)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fblinkfox%2Fstalker&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com) [![Build Status](https://secure.travis-ci.org/blinkfox/stalker.svg)](https://travis-ci.org/blinkfox/stalker) [![GitHub license](https://img.shields.io/github/license/blinkfox/stalker.svg)](https://github.com/blinkfox/stalker/blob/master/LICENSE) [![codecov](https://codecov.io/gh/blinkfox/stalker/branch/master/graph/badge.svg)](https://codecov.io/gh/blinkfox/stalker) ![Java Version](https://img.shields.io/badge/Java-%3E%3D%208-blue.svg)
 
-> 这是一个简单的用来对 Java 代码做性能评估和性能测试的工具库。
+> 这是一个简单、轻量级和可编程的 Java 代码性能测试工具库。
 
 ## 一、特性
 
-- 简单、轻量级（jar包仅`52kb`）
+- 简单、轻量级（jar 包仅`52kb`）和可编程的性能测试工具库
 - 支持对性能的多种统计纬度
 - API 简单易用，易于集成或扩展
 
@@ -18,14 +18,14 @@
 <dependency>
     <groupId>com.blinkfox</groupId>
     <artifactId>stalker</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
 </dependency>
 ```
 
 ### 2. Gradle
 
 ```bash
-compile 'com.blinkfox:stalker:1.2.2'
+compile 'com.blinkfox:stalker:1.2.3'
 ```
 
 ## 三、API 介绍和使用
@@ -362,6 +362,8 @@ Assert.assertFaster(Options.of(),
 
 ## 五、变更日志
 
+- v1.2.3 修复 StalkerFuture 资源关闭不完全的 bug (2021-11-26)
+  - 修复了 StalkerFuture 中 `done` 方法完成后资源关闭不完全的 `bug`；
 - v1.2.2 新增了部分 API (2020-06-16)
   - 新增了和改进了部分 API；
 - v1.2.1 新增了部分 API (2020-06-15)

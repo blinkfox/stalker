@@ -35,8 +35,8 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
      */
     public SimpleScheduledMeasureRunner() {
         super();
-        this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "simple-scheduled-thread");
-        super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-scheduled-measure-thread");
+        this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "stalker-simple-scheduled");
+        super.executorService = StalkerExecutors.newSingleThreadExecutor("stalker-simple-scheduled-measure");
     }
 
     /**
@@ -97,7 +97,10 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         // 如果没有设置相关的结束信息资源，就设置，没有关闭相关的资源就进行关闭.
         super.setEndNanoTimeIfEmpty(System.nanoTime());
         super.completed.compareAndSet(false, true);
-        StalkerExecutors.shutdown(super.executorService, this.scheduledExecutorService);
+        StalkerExecutors.shutdownNow(super.executorService, this.scheduledExecutorService);
+        if (!this.scheduledFuture.isDone()) {
+            this.scheduledFuture.cancel(true);
+        }
         return super.getMeasureResult();
     }
 

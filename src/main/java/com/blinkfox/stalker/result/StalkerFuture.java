@@ -29,8 +29,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     /**
      * 用于异步提交任务的线程池.
      */
-    private static final ExecutorService executor =
-            StalkerExecutors.newThreadExecutor(4, 16, "stalker-future-thread");
+    private final ExecutorService executor;
 
     /**
      * 用于异步定时更新统计数据的线程池.
@@ -74,6 +73,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
         this.options = options;
         this.runnable = runnable;
         this.measureRunner = measureRunner;
+        this.executor = StalkerExecutors.newSingleThreadExecutor("stalker-future-thread");
 
         // 如果启用了定时更新统计数据的任务，就构造定时任务线程池，并开启异步定时获取统计数据的任务.
         ScheduledUpdater scheduledUpdater = options.getScheduledUpdater();
@@ -180,7 +180,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
     public StalkerFuture done(Consumer<StalkerFuture> futureConsumer) {
         // 如果没完成，就阻塞休眠一定的时间，再判断是否完成了.
         while (!this.isDone()) {
-            this.sleep(200L);
+            this.sleep(50L);
         }
 
         // 完成后执行对应的回调任务.
@@ -260,7 +260,7 @@ public class StalkerFuture implements RunnableFuture<List<Object>> {
 
         // 如果线程池未关闭，就关闭线程池，注意，这里不要理解关闭和立即终止正在运行中的任务，防止最后的统计数据更新异常.
         if (this.scheduledUpdateExecutor != null && !this.scheduledUpdateExecutor.isShutdown()) {
-            this.scheduledUpdateExecutor.shutdown();
+            this.scheduledUpdateExecutor.shutdownNow();
         }
         if (this.scheduledUpdateFuture != null && !this.scheduledUpdateFuture.isDone()) {
             this.scheduledUpdateFuture.cancel(false);
