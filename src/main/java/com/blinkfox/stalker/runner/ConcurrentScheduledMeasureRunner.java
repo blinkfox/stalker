@@ -71,16 +71,13 @@ public class ConcurrentScheduledMeasureRunner extends ConcurrentMeasureRunner {
         long expectEndNanoTime = duration.getEndNanoTime(super.startNanoTime);
 
         while (true) {
+            // 如果任务线程池已终止，或者当前时间大于了期望的结束时间，就跳出 while 循环.
+            if (super.executorService.isShutdown() || (System.nanoTime() > expectEndNanoTime)) {
+                break;
+            }
+
             try {
                 semaphore.acquire();
-                if (super.executorService.isShutdown()) {
-                    return super.getMeasureResult();
-                }
-
-                // 如果当前时间大于了期望的结束时间，就跳出 while 循环.
-                if (System.nanoTime() > expectEndNanoTime) {
-                    break;
-                }
                 final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     this.loopMeasure(runs, printErrorLog, runnable);
                     semaphore.release();

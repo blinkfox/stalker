@@ -235,12 +235,12 @@ public class StalkerTest {
     @Test
     public void submitWithDuration() {
         // 构造新的输出结果.
-        Options options = Options.ofDurationSeconds(15, 5)
+        Options options = Options.ofDurationSeconds(5, 3).warmups(0)
                 .outputs(MeasureOutput.ofList(new AsciiTableOutput()));
 
         Stalker.submit(options, () -> new MyTestService().slowHello())
                 .waitDone(future -> log.info("\n{}\n当前进度: [{}%].", future.getFirst(),
-                        StrKit.roundToString(Stalker.getProgress(options, future.getMeasureResult()))), 3000L)
+                        StrKit.roundToString(Stalker.getProgress(options, future.getMeasureResult()))), 2000L)
                 .done(future -> {
                     log.info("任务已完成，进度:【{}%】，获取最终的执行结果信息.",
                             StrKit.roundToString(Stalker.getProgress(options, future.getMeasureResult())));
@@ -249,6 +249,7 @@ public class StalkerTest {
                     Assert.assertTrue(future.isDone());
                     Assert.assertEquals(future.getTotal(), future.getSuccess() + future.getFailure());
                     Assert.assertTrue(future.getCosts() > 0);
+                    log.info("已全部完成.");
                 });
     }
 

@@ -36,6 +36,7 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
     public SimpleScheduledMeasureRunner() {
         super();
         this.scheduledExecutorService = StalkerExecutors.newScheduledThreadPool(1, "simple-scheduled-thread");
+        super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-scheduled-measure-thread");
     }
 
     /**
@@ -48,12 +49,16 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
     @Override
     public MeasureResult run(Options options, Runnable runnable) {
         boolean printErrorLog = options.isPrintErrorLog();
-        super.executorService = StalkerExecutors.newSingleThreadExecutor("simple-scheduled-measure-thread");
         super.startNanoTime = System.nanoTime();
 
         // 将单线程中执行的任务放在 while 循环中，一直执行下去.
         super.measureFuture = executorService.submit(() -> {
             while (true) {
+                // 如果任务已经完成或取消，就直接退出了.
+                if (super.executorService.isShutdown()) {
+                    break;
+                }
+
                 try {
                     // 开始执行测量任务，记录开始时间、执行次数等.
                     long eachStart = System.nanoTime();
@@ -82,6 +87,9 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
             this.measureFuture.get();
         } catch (CancellationException e) {
             log.info("【Stalker 提示】已取消或完成指定运行时间的测量任务.");
+        } catch (InterruptedException e) {
+            log.info("【Stalker 提示】指定运行时间的测量任务被中断了.");
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error("【Stalker 错误】执行测量任务发生错误！", e);
         }
@@ -104,10 +112,10 @@ public class SimpleScheduledMeasureRunner extends SimpleMeasureRunner {
         super.stop();
 
         // 关闭定时任务线程池和取消对应的定时任务.
-        StalkerExecutors.shutdown(this.scheduledExecutorService);
         if (this.scheduledFuture != null && !this.scheduledFuture.isDone()) {
             this.scheduledFuture.cancel(true);
         }
+        StalkerExecutors.shutdownNow(this.scheduledExecutorService);
     }
 
 }
