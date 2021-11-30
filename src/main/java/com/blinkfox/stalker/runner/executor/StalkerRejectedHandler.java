@@ -21,7 +21,7 @@ public class StalkerRejectedHandler implements RejectedExecutionHandler {
      */
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-        log.warn("【Stalker 警示】线程池队列任务已满，将拒绝接收新的执行任务，建议你调低运行的【并发数】。");
+        log.info("【Stalker 警示】线程池队列任务已满，将拒绝接收新的执行任务，建议你调低运行的【并发数】。");
     }
 
 }
